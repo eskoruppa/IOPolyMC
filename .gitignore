@@ -20,4 +20,4 @@ iopolymc.egg-info/
 **.c
 
 # ignore all test files
-**test.*
+**test.py
