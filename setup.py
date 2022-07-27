@@ -9,7 +9,6 @@ setup(name='iopolymc',
       license='MIT',
       packages=['iopolymc'],
       install_requires=[
-          'numpy',
-          'wheel'
+          'numpy<=1.22',
       ],
       zip_safe=False)
