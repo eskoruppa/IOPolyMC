@@ -10,5 +10,6 @@ setup(name='iopolymc',
       packages=['iopolymc'],
       install_requires=[
           'numpy',
+          'wheel'
       ],
       zip_safe=False)
