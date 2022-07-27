@@ -8,4 +8,7 @@ setup(name='iopolymc',
       author_email='enrico.skoruppa@gmail.com',
       license='MIT',
       packages=['iopolymc'],
+      install_requires=[
+          'numpy',
+      ],
       zip_safe=False)
