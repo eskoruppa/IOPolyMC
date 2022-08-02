@@ -11,4 +11,4 @@ setup(name='iopolymc',
       install_requires=[
           'numpy<=1.22',
       ],
-      zip_safe=False)
+      zip_safe=False) 
