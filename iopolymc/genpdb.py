@@ -1,14 +1,11 @@
-import os,sys
 import json
 import numpy as np
 import pkg_resources
-
 from iopolymc.state  import read_state
 
 BPDICTS_FN = 'database/bpdicts'
 
-
-def load_bpdicts(fn: str) -> dict:
+def _load_bpdicts(fn: str) -> dict:
     """
     Parameters:
     fn : str
@@ -21,20 +18,21 @@ def load_bpdicts(fn: str) -> dict:
         bpdicts = json.load(f)
     return bpdicts
 
-
-def DNA_residue_name(residue_name):
-    if residue_name == "A":
+def _DNA_residue_name(residue_name):
+    """
+        converts basename into pdb residue name
+    """
+    if residue_name.lower() == 'a':
         return "DA"
-    if residue_name == "T":
+    if residue_name.lower() == "t":
         return "DT"
-    if residue_name == "G":
+    if residue_name.lower() == "g":
         return "DG"
-    if residue_name == "C":
+    if residue_name.lower() == "c":
         return "DC"
-    return residue_name
+    return ''
 
-
-def build_pdb_atomline(atomID: int,
+def _build_pdb_atomline(atomID: int,
                        atom_name: str,
                        residue_name: str,
                        strandID: str,
@@ -43,30 +41,30 @@ def build_pdb_atomline(atomID: int,
     """
         generates pdb line for atom
     """
-    pdbline = "ATOM  " + leftshiftstring(5, str(atomID)) + \
-              " " + leftshiftstring(4, atom_name) + \
-              " " + leftshiftstring(3, residue_name) + \
-              " " + str(strandID) + leftshiftstring(4, str(residueID)) + \
-              "    " + leftshiftstring(8,"%.3f" %atom_pos[0]) + \
-              leftshiftstring(8, "%.3f" % atom_pos[1]) + \
-              leftshiftstring(8, "%.3f" % atom_pos[2]) + " \n"
+    pdbline = "ATOM  " + _leftshiftstring(5, str(atomID)) + \
+              " " + _leftshiftstring(4, atom_name) + \
+              " " + _leftshiftstring(3, residue_name) + \
+              " " + str(strandID) + _leftshiftstring(4, str(residueID)) + \
+              "    " + _leftshiftstring(8,"%.3f" %atom_pos[0]) + \
+              _leftshiftstring(8, "%.3f" % atom_pos[1]) + \
+              _leftshiftstring(8, "%.3f" % atom_pos[2]) + " \n"
     return pdbline
 
-def build_pdb_terline(atomID: int , residue_name: str, strandID: str, residueID: int) -> str:
+def _build_pdb_terline(atomID: int , residue_name: str, strandID: str, residueID: int) -> str:
     """
         generates TER line for pdb strand
     """
-    pdbline = "TER   " + leftshiftstring(5, str(atomID)) + \
-              " " + leftshiftstring(4, "") + \
-              " " + leftshiftstring(3,residue_name) + \
+    pdbline = "TER   " + _leftshiftstring(5, str(atomID)) + \
+              " " + _leftshiftstring(4, "") + \
+              " " + _leftshiftstring(3,residue_name) + \
               " " + str(strandID) + \
-              leftshiftstring(4, str(residueID)) + "    \n"
+              _leftshiftstring(4, str(residueID)) + "    \n"
     return pdbline
 
 
-def leftshiftstring(total_chars: int, string: str) -> str:
+def _leftshiftstring(total_chars: int, string: str) -> str:
     """
-        fills spaces
+        add lefthand spaces to string to fill number of characters
     """
     chars = len(string)
     shifted_str = ""
@@ -74,7 +72,7 @@ def leftshiftstring(total_chars: int, string: str) -> str:
         shifted_str += " "
     return shifted_str + string
 
-def rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
+def _rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
     """
         rotates triad over z axis by angle phi
     """
@@ -86,15 +84,14 @@ def rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
     R_z[2, 2] = 1
     return np.matmul(triad, R_z)
 
-
-def random_sequence(N: int) -> list[str]:
+def _random_sequenceuence(N: int) -> list[str]:
     """
         generates random base sequence of length N
     """
     basetypes = ['A','T','C','G']
     return [basetypes[bt] for bt in np.random.randint(4, size=N)]
 
-def discretization_length(conf: np.ndarray) -> np.ndarray:
+def _discretization_length(conf: np.ndarray) -> np.ndarray:
     """ returns lengths of vectors """
     ndims = len(np.shape(conf))
     vecs  = np.diff(conf,axis=ndims-2)
@@ -115,16 +112,15 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
 
     numbp = len(positions)
 
-
     # check if the discretization length is correct
     # this may be replaced in the future by allowing all discretization lengths
-    disc_len = discretization_length(positions)
+    disc_len = _discretization_length(positions)
     if np.abs(disc_len-3.4)/3.4 > 0.1:
         # wrong discretization length
         raise ValueError(f"Discretization length needs to be 0.34 nm. Provided configuration has discretization length {disc_len} nm!")
 
     if sequence is None:
-        sequence = random_sequence(numbp)
+        sequence = _random_sequenceuence(numbp)
 
     if center:
         positions -= np.mean(positions,axis=0)
@@ -153,10 +149,10 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
                 atom_pos  = atom['pos']
                 # atom_pos = np.dot(atom_pos,triad) + pos
                 atom_pos = np.dot(triad.T,atom_pos) + pos
-                pdbline  = build_pdb_atomline(atomID, atom_name, residue_name, strandID, residueID, atom_pos)
+                pdbline  = _build_pdb_atomline(atomID, atom_name, residue_name, strandID, residueID, atom_pos)
                 f.write(pdbline)
 
-        pdbline = build_pdb_terline(atomID, residue_name, strandID, residueID)
+        pdbline = _build_pdb_terline(atomID, residue_name, strandID, residueID)
         f.write(pdbline)
 
         # STRAND B
@@ -177,16 +173,12 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
                 atom_pos = atom['pos']
                 # atom_pos = np.dot( atom_pos,triad) + pos
                 atom_pos = np.dot( triad.T,atom_pos) + pos
-                pdbline = build_pdb_atomline(atomID, atom_name, residue_name, strandID, residueID, atom_pos)
+                pdbline = _build_pdb_atomline(atomID, atom_name, residue_name, strandID, residueID, atom_pos)
                 f.write(pdbline)
-        pdbline = build_pdb_terline(atomID, residue_name, strandID, residueID)
+        pdbline = _build_pdb_terline(atomID, residue_name, strandID, residueID)
         f.write(pdbline)
 
         f.close()
-
-
-
-
 
 def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn=None, sequence=None, center=True):
     """
@@ -211,7 +203,7 @@ def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn=None, sequence
     # load base pair database
     if bpdicts_fn is None:
         bpdicts_fn = pkg_resources.resource_filename(__name__, BPDICTS_FN)
-    bpdicts = load_bpdicts(bpdicts_fn)
+    bpdicts = _load_bpdicts(bpdicts_fn)
 
     # load state
     state  = read_state(statefn)
@@ -224,32 +216,3 @@ def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn=None, sequence
     pos    = conf[snapshot]*10
     triads = triads[snapshot]
     gen_pdb(outfn, pos, triads, bpdicts, sequence=sequence)
-
-
-
-if __name__ == "__main__":
-
-    bpdicts_fn = pkg_resources.resource_filename(__name__, BPDICTS_FN)
-    bpdicts = load_bpdicts(bpdicts_fn)
-
-    # print(bpdicts)
-
-    print(random_sequence(10))
-
-    statefn = 'testdata/conf4pdb.state'
-
-    state  = read_state(statefn)
-    conf   = state['pos']
-    triads = state['triads']
-
-    snapshot = 1
-
-    pos = conf[snapshot]
-    # pos /= (2/0.34)
-    triads = triads[snapshot]
-
-    outfn = 'testdata/conf4pdb.pdb'
-
-    # rescale to Angstrom
-    pos *= 10
-    gen_pdb(outfn, pos, triads, bpdicts, sequence = None)
