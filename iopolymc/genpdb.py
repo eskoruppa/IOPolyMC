@@ -151,7 +151,7 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
                 atomID += 1
                 atom_name = atom['name']
                 atom_pos  = atom['pos']
-                atom_pos = np.dot(triad,atom_pos) + pos
+                atom_pos = np.dot(atom_pos,triad) + pos
                 pdbline  = build_pdb_atomline(atomID, atom_name, residue_name, strandID, residueID, atom_pos)
                 f.write(pdbline)
 
@@ -174,7 +174,7 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
                 atomID += 1
                 atom_name = atom['name']
                 atom_pos = atom['pos']
-                atom_pos = np.dot(triad, atom_pos) + pos
+                atom_pos = np.dot( atom_pos,triad) + pos
                 pdbline = build_pdb_atomline(atomID, atom_name, residue_name, strandID, residueID, atom_pos)
                 f.write(pdbline)
         pdbline = build_pdb_terline(atomID, residue_name, strandID, residueID)
