@@ -26,7 +26,6 @@ XYZ_NPY_EXT = '_xyz'
 
 def load_xyz(filename,savenpy=True,loadnpy=True):
     fnpy = filename[:-4]+XYZ_NPY_EXT+'.npy'
-    print(fnpy)
     if os.path.isfile(fnpy) and loadnpy:
         xyz          = dict()
         print(f"loading positions from '{fnpy}'")

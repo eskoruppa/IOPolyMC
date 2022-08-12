@@ -1,5 +1,5 @@
 import numpy as np
-import os,sys,glob
+import os,sys
 from ._file_read import file_read
 
 """

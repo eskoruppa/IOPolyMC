@@ -1,5 +1,5 @@
 import numpy as np
-import os,sys,glob
+import os,sys
 
 def load_thetas(filename):
     npyfn = '.'.join(filename.split('.')[:-1])+'_thetas.npy'

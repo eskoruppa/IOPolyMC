@@ -8,6 +8,11 @@ setup(name='iopolymc',
       author_email='enrico.skoruppa@gmail.com',
       license='MIT',
       packages=['iopolymc'],
+      package_dir={
+            'iopolymc': 'iopolymc',
+      },
+      include_package_data=True,
+      package_data={'': ['database/*']},
       install_requires=[
           'numpy<=1.22',
       ],

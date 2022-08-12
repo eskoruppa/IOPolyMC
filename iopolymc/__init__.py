@@ -6,6 +6,8 @@ Provides methods to read PolyMC output and write PolyMC input files
 
 """
 
+# ~ __all__ = ["idb","restart","state","thetas","xyz"]
+
 from .idb       import readidb
 from .restart   import read_restart
 from .restart   import write_restart
@@ -19,3 +21,5 @@ from .xyz       import read_xyz
 from .xyz       import read_xyz_atomtypes
 from .xyz       import write_xyz
 from .xyz       import save_xyz_binary
+from .genpdb     import state2pdb
+from .genpdb     import gen_pdb

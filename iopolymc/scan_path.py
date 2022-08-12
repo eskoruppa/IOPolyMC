@@ -1,5 +1,3 @@
-import numpy as np
-import os,sys,glob
 from .state import *
 
 def scan_path(path,ext):

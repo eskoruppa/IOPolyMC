@@ -5,7 +5,6 @@
 # - adds line count
 #
 import numpy as np
-# ~ from FileRead import *
         
 class file_read(object):
     total_linenumber = -1

@@ -1,6 +1,5 @@
 import numpy as np
-import os,sys,glob
-from ._file_read import file_read
+import sys
 
 
 RESTART_SEPERATOR = '###############################################################'
