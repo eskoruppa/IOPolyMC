@@ -11,4 +11,8 @@ if __name__ == "__main__":
     fout     = sys.argv[2]
     snapshot = int(sys.argv[3])
 
-    iopmc.state2pdb(statefn,fout,snapshot)
+    seq = None
+    if len(sys.argv) > 4:
+        seq = sys.argv[4]
+
+    iopmc.state2pdb(statefn,fout,snapshot,sequence=seq)
