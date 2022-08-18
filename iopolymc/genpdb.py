@@ -99,7 +99,6 @@ def _discretization_length(conf: np.ndarray) -> np.ndarray:
 
 def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, sequence = None, center=True):
     """
-
         positions needs to be in nm!
     """
 
@@ -115,7 +114,7 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
     # check if the discretization length is correct
     # this may be replaced in the future by allowing all discretization lengths
     disc_len = _discretization_length(positions)
-    if np.abs(disc_len-3.4)/3.4 > 0.1:
+    if np.abs(disc_len-0.34)/0.34 > 0.1:
         # wrong discretization length
         raise ValueError(f"Discretization length needs to be 0.34 nm. Provided configuration has discretization length {disc_len} nm!")
 
@@ -124,6 +123,9 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
 
     if center:
         positions -= np.mean(positions,axis=0)
+
+    #convert to Anstrom
+    positions = 10*np.array(positions)
 
     with open(outfn, "w") as f:
 
@@ -213,6 +215,6 @@ def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn=None, sequence
     if snapshot >= len(conf):
         raise ValueError(f"State file only contains {len(conf)} snapshots. Chosen snapshot {snapshot} is out of range.")
 
-    pos    = conf[snapshot]*10
+    pos    = conf[snapshot]
     triads = triads[snapshot]
     gen_pdb(outfn, pos, triads, bpdicts, sequence=sequence)
