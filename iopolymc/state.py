@@ -4,7 +4,6 @@ from ._file_read import file_read
 
 """
 ########################################################
-Read/read_state.py
     
     state = load_state(filename)
     state = read_state(filename)
@@ -267,19 +266,12 @@ def read_state(filename):
                         break
                     Omegas[i] = [float(ll[0]),float(ll[1]),float(ll[2])]
                 if valid==True:
-                    all_Omegas.append(Omegas)
-                else:
-                    print("Error encountered while reading state file Omegas")
-                    raise InputError
-                    
-        line = line = FR.readline()
-    FR.close()
-    
-    state = specs
-    if state['pos_contained']:
-        state['pos'] = np.array(all_pos)
-    if state['triads_contained']:
-        state['triads'] = np.array(all_triads)
+                    all_Omegas.appenload_state(fn)
+    # pos = state['pos']
+    # # ~ fnpy = fn.split('.')[0]+'.npy'
+    # # ~ _save_pos(fnpy,pos)
+        
+    # print("%d y(all_triads)
     if state['Omegas_contained']:
         state['Omegas'] = np.array(all_Omegas)
     return state
@@ -306,10 +298,10 @@ if __name__ == "__main__":
     for key,val in spec.items():
         print( key, "=", val )
     
-    state = load_state(fn)
-    pos = state['pos']
-    # ~ fnpy = fn.split('.')[0]+'.npy'
-    # ~ _save_pos(fnpy,pos)
+    # state = load_state(fn)
+    # pos = state['pos']
+    # # ~ fnpy = fn.split('.')[0]+'.npy'
+    # # ~ _save_pos(fnpy,pos)
         
-    print("%d snapshots found"%len(pos))
+    # print("%d snapshots found"%len(pos))
     
