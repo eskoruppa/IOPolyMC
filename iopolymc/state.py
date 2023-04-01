@@ -3,30 +3,6 @@ import os,sys
 from ._file_read import file_read
 from .simplest_type import simplest_type
 
-"""
-########################################################
-    
-    state = load_state(filename)
-    state = read_state(filename)
-    specs = read_spec(filename)
-    
-        read_state always reads the state file while load_state accesses the 
-        binary if it exists and creates it if it doesn't such that access
-        will be accelerated next time.
-        
-        state is a dictionary containing all the specs as well as 
-        trajectories. 
-        specs contains the same except for the trajectories
-        
-    
-On Execution: 
-    Read/read_state.py filename 
-        
-        Reads state file, prints specs in terminal and creates trajectory
-        binary file.
-        
-########################################################
-"""
 
 def load_state(filename: str) -> dict:
     """
@@ -36,9 +12,9 @@ def load_state(filename: str) -> dict:
         Use to speed up loadtime
     """
     
-    pos_fnpy    = filename[:-6]+'_pos.npy'
-    triads_fnpy = filename[:-6]+'_triads.npy'
-    Omegas_fnpy = filename[:-6]+'_Omegas.npy'
+    pos_fnpy    = os.path.splitext(filename)[0] + '_pos.npy'
+    triads_fnpy = os.path.splitext(filename)[0] + '_triads.npy'
+    Omegas_fnpy = os.path.splitext(filename)[0] + '_Omegas.npy'
     
     state     = read_spec(filename)
     all_found = True
@@ -74,13 +50,13 @@ def load_state(filename: str) -> dict:
             
     return state
 
-def read_spec(filename: str) -> dict:
+def read_spec(fn: str) -> dict:
     specs = dict()
     specs["pos_contained"]    = False
     specs["triads_contained"] = False
     specs["Omegas_contained"] = False
     
-    with open(filename, 'r') as f:
+    with open(fn, 'r') as f:
         line = f.readline()
         ll = _linelist(line)
         while line != '' and 'snapshot' not in line.lower():
@@ -157,145 +133,7 @@ def read_state(fn: str) -> dict():
         specs['Omegas'] = np.array(all_Omegas)
     
     return specs
-        
-
-
-
-
-
-# def read_state(filename: str) -> dict: 
-#     """
-#         Reads state-file. 
-#     """
-#     print(f"reading '{filename}'")
-     
-#     specs = dict()
-#     specs["pos_contained"]    = False
-#     specs["triads_contained"] = False
-#     specs["Omegas_contained"] = False
     
-#     FR = file_read(filename)
-#     line = FR.readline()
-#     ll = FR.linelist()
-#     while line!="":
-#         while ll[0] != "Snapshot":
-#             if ll[0] == "Mode":
-#                 specs["Mode"]     = _remove_newline(ll[2])
-#             if ll[0] == "Segments:":
-#                 specs["Segments"] = int(ll[1])
-#             if ll[0] == "disc_len:":
-#                 specs["disc_len"] = float(ll[1])
-#             if ll[0] == "Ia_range:":
-#                 specs["Ia_range"] = int(ll[1])
-#             if ll[0] == "T":
-#                 specs["T"]        = float(ll[2])
-#             if ll[0] == "closed":
-#                 specs["closed"]   = int(ll[2])
-#             if ll[0] == "Lk_fixed:":
-#                 specs["Lk_fixed"] = int(ll[1])
-#             if ll[0] == "EVactive:":
-#                 specs["EVactive"] = int(ll[1])
-#             if ll[0] == "EVradius:":
-#                 specs["EVradius"] = float(ll[1])
-#             if ll[0] == "delta_LK:":
-#                 specs["delta_LK"] = float(ll[1])
-#             if ll[0] == "force":
-#                 specs["force"]    = float(ll[2])
-
-#             if ll[0] == "pos":
-#                 specs["pos_contained"]    = bool(int(ll[2]))
-#             if ll[0] == "triads":
-#                 specs["triads_contained"] = bool(int(ll[2]))
-#             if ll[0] == "Omegas":
-#                 specs["Omegas_contained"] = bool(int(ll[2]))
-                
-#             line = FR.readline()
-#             ll = FR.linelist()
-#             if line=="":
-#                 break
-#         if ll[0] == "Snapshot":
-#             break
-#         line = FR.readline()
-#         ll = FR.linelist()
-    
-#     # This line accounts for older versions that didn't contain the dump specifier and only dumped positions
-#     if (not specs["pos_contained"] and not specs["triads_contained"] and not specs["Omegas_contained"]):
-#         specs["pos_contained"] = True
-        
-#     if specs["pos_contained"]:
-#         all_pos    = list()
-#     if specs["triads_contained"]:
-#         all_triads = list()
-#     if specs["Omegas_contained"]:
-#         all_Omegas = list()
-        
-#     num_bp = specs["Segments"]
-#     if specs["closed"]:
-#         num_bps = num_bp
-#     else:
-#         num_bps = num_bp-1
-    
-#     counter=0
-#     while line!="":
-#         ll = FR.linelist()
-#         if ll[0] == "Snapshot":
-#             counter+=1
-#             #~ print("reading snapshot %d"%counter)
-            
-#             if specs["pos_contained"]:
-#                 valid=True
-#                 pos=np.zeros([num_bp,3])
-#                 for i in range(num_bp):
-#                     line = FR.readline()
-#                     ll = FR.linelist()
-#                     if len(ll) != 4:
-#                         valid=False
-#                         break
-#                     pos[i] = [float(ll[0]),float(ll[1]),float(ll[2])]
-#                 if valid==True:
-#                     all_pos.append(pos)
-#                 else:
-#                     print("Error encountered while reading state file positions")
-#                     raise InputError
-                    
-#             if specs["triads_contained"]:
-#                 valid=True
-#                 triads=np.zeros([num_bp,3,3])
-#                 for i in range(num_bp):
-#                     line = FR.readline()
-#                     ll = FR.linelist()
-#                     if len(ll) != 10:
-#                         valid=False
-#                         break
-#                     triads[i,0] = [float(ll[0]),float(ll[1]),float(ll[2])]
-#                     triads[i,1] = [float(ll[3]),float(ll[4]),float(ll[5])]
-#                     triads[i,2] = [float(ll[6]),float(ll[7]),float(ll[8])]
-#                 if valid==True:
-#                     all_triads.append(triads)
-#                 else:
-#                     print("Error encountered while reading state file triads")
-#                     raise InputError
-                    
-#             if specs["Omegas_contained"]:
-#                 valid=True
-#                 Omegas=np.zeros([num_bps,3])
-#                 for i in range(num_bps):
-#                     line = FR.readline()
-#                     ll = FR.linelist()
-#                     if len(ll) != 4:
-#                         valid=False
-#                         break
-#                     Omegas[i] = [float(ll[0]),float(ll[1]),float(ll[2])]
-#                 if valid==True:
-#                     all_Omegas.appenload_state(fn)
-#     # pos = state['pos']
-#     # # ~ fnpy = fn.split('.')[0]+'.npy'
-#     # # ~ _save_pos(fnpy,pos)
-        
-#     # print("%d y(all_triads)
-#     if state['Omegas_contained']:
-#         state['Omegas'] = np.array(all_Omegas)
-#     return state
     
 def _save_pos(outname,snapshots):
     if outname[-4:] == '.npy':
