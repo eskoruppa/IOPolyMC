@@ -1,24 +1,27 @@
-import numpy as np
-import sys,os
+#!/bin/env python3
+
+import os,sys
 from typing import List
+
+
+
+try:
+    import numpy as np
+except ModuleNotFoundError:
+    print("numpy not installed. Please install numpy")
+    sys.exit("terminated")
 
 """
 ########################################################
     
     
-    specs,snapshots = load_xyz(filename)
-    specs,snapshots = read_xyz(filename)
+    specs = load_xyz(filename)
+    specs = read_xyz(filename)
     
         readxyz always reads the xyz file while loadxyz accesses the 
         binary if it exists and creates it if it doesn't such that access
         will be accelerated next time.
-        
-On Execution: 
-    Read/readxyz.py filename 
-        
-        Reads state file, prints specs in terminal and creates trajectory
-        binary file.
-        
+            
 ########################################################
 """
 
@@ -133,19 +136,11 @@ def _save_xyz_binary(outname: str,data: np.ndarray) -> None:
 
 
 if __name__ == "__main__":
-    
     if len(sys.argv) < 3:
         print("usage: python %s fin fout"%sys.argv[0])
         sys.exit(0)
     fin  = sys.argv[1]
     fout = sys.argv[2]
     xyz  = load_xyz(fin)
-    # ~ fnpy = fin[:-4]+XYZ_NPY_EXT+'.npy'
-    # ~ save_xyz_binary(fnpy,xyz)
-    
     types = read_xyz_atomtypes(fin)
     print(f'number of atoms = {len(types)}')
-    
-    # ~ print(xyz.keys())
-    # ~ write_xyz(fout,xyz)
-    
