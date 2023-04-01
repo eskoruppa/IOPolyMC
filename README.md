@@ -118,5 +118,5 @@ io.pts2restart(outfn : str, pts : np.ndarray, disc_len : float, closed = False, 
 ```
 
 ```python
-io.unique_oligomers(num_bp: int, bases="atcg",omit_equiv=True) -> List[str]
+io.unique_oligomers(num_bp: int,omit_equiv=True) -> List[str]
 ```

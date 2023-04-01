@@ -3,68 +3,43 @@ import sys
 from typing import List
 
 
-def unique_oligomers(num_bp: int, bases="atcg",omit_equiv=True) -> List[str]:
-    uo = UniqueOligomers(bases=bases,omit_equiv=omit_equiv)
+def unique_oligomers(num_bp: int,omit_equiv=True) -> List[str]:
+    uo = UniqueOligomers(omit_equiv=omit_equiv)
     return uo.get_oligomers(num_bp)
-
-
-class UniqueOligomers(object):
     
-    bases: str
-    total: int
-    seqlist: List[str]
-
-    def __init__(self,bases="atcg",omit_equiv=True):
-        self.bases = bases.lower()
+class UniqueOligomers:
+    def __init__(self, omit_equiv=True):
+        self.bases = 'atcg'
         self.omit_equiv = omit_equiv
-        self.total   = 0
-        self.seqlist = list()
-    
-    def get_oligomers(self, num_bp: int):
-        self.seqlist    = list()
-        current         = 0
-        self.total      = num_bp
-        
-        self._seqloop("",current)
+
+    def get_oligomers(self, num_bp):
+        self.seqlist = []
+        self._seqloop('', 0, num_bp)
         return self.seqlist
-        
-    def _seqloop(self,seq,current):
+
+    def _seqloop(self, seq, current, num_bp):
         current += 1
-        for i in range(len(self.bases)): 
-            new_seq = "%s"%seq + self.bases[i]
-            
-            if current < self.total:
-                self.seqloop(new_seq,current)
+        for i in range(len(self.bases)):
+            new_seq = seq + self.bases[i]
+            if current < num_bp:
+                self._seqloop(new_seq, current, num_bp)
             else:
-                if (not self.omit_equiv) or (not self.invert_seq(new_seq) in self.seqlist):
-                #if not self.invert_seq(new_seq) in self.seqlist:
+                if not (self.omit_equiv and self.invert_seq(new_seq) in self.seqlist):
                     self.seqlist.append(new_seq)
-    
-    def invert_seq(self,seq: str) -> str:
-        amount_bp = len(seq)
-        inv = ''
-        for i in range(amount_bp):
-            if seq[amount_bp-1-i] == "a":
-                inv = inv + "t"
-            if seq[amount_bp-1-i] == "t":
-                inv = inv + "a"
-            if seq[amount_bp-1-i] == "c":
-                inv = inv + "g"
-            if seq[amount_bp-1-i] == "g":
-                inv = inv + "c"
-        return inv
-    
-    def get_mid_dimer(self,seq: str):
-        original = seq
-        if len(seq)%2 == 0:
-            UO = UniqueOligomers()
-            unique_dimers = np.sort(UO.get_oligomers(2))
-            dimer = seq[len(seq)/2-1:len(seq)/2+1] 
+
+    def invert_seq(self, seq):
+        comp_dict = {'a': 't', 't': 'a', 'c': 'g', 'g': 'c'}
+        return ''.join(comp_dict[base] for base in seq[::-1])
+
+    def get_mid_dimer(self, seq):
+        if len(seq) % 2 == 0:
+            unique_dimers = sorted(self.get_oligomers(2))
+            dimer = seq[len(seq)//2-1:len(seq)//2+1]
             if dimer not in unique_dimers:
-                dimer       = self.invert_seq(dimer)
-                original    = self.invert_seq(seq)
-            return dimer,original
-        return "",original
+                dimer = self.invert_seq(dimer)
+                seq = self.invert_seq(seq)
+            return dimer, seq
+        return '', seq
 
 if __name__ == "__main__":
     
