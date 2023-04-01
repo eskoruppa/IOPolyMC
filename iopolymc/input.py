@@ -1,8 +1,8 @@
 import numpy as np
 import sys,os
 import glob
-from ast import literal_eval
 from typing import List
+from .simplest_type import simplest_type
 
 """
 ########################################################
@@ -27,9 +27,9 @@ def read_input(filename: str) -> dict:
             argstr  = '='.join(line.split('=')[1:]).strip()
             arglist = [arg.strip() for arg in argstr.split(' ')]
             if len(arglist) == 1:
-                args[argname] = _simplest_type(arglist[0])
+                args[argname] = simplest_type(arglist[0])
             else:
-                args[argname] = _simplest_type(arglist)
+                args[argname] = simplest_type(arglist)
     return args
 
 def write_input(filename: str,args: dict):
@@ -119,12 +119,6 @@ def _fast_scandir(path: str) -> List[str]:
     for path in list(subpaths):
         subpaths.extend(_fast_scandir(path))
     return subpaths
-
-def _simplest_type(s: str):
-    try:
-        return literal_eval(s)
-    except:
-        return s
 
 ########################################################
 ########################################################
