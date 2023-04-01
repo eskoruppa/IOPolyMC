@@ -45,7 +45,10 @@ Writes xyz file. The argument data has to be a dictionary containing the keys 'p
 
 ## IDB files
 ```python
-io.readidb(filename: str) -> dict
+io.read_idb(filename: str) -> dict
+```
+```python
+io.write_idb(filename: str, idbdict: dict, decimals=3)
 ```
 
 ## restart files
@@ -112,4 +115,8 @@ io.pts2xyz(outfn : str, pts : np.ndarray, disc_len : float, closed = False, numb
 ```
 ```python
 io.pts2restart(outfn : str, pts : np.ndarray, disc_len : float, closed = False, numbp = None, translate_first = True, sequence = None, default_type = 'a', snapshotid = 0)
+```
+
+```python
+io.unique_oligomers(num_bp: int, bases="atcg",omit_equiv=True) -> List[str]
 ```

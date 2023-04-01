@@ -1,21 +1,16 @@
 import sys
 from typing import List
 
-"""
-########################################################
-Read/readidb.py
-
-    returns dictionary for idb
+def read_idb(filename: str) -> dict:
+    """
+    returns dictionary
     keys:
     - interaction_range (0 = local)
     - monomer_types (what are the possible types used)
     - discretization
     - avg_inconsist (relevant for non-local couplings)
     - seq_params (dict with oligomer types (key) + 3 arguments: types, vec (groundstate), params (identifier model + list of model parameters))
-########################################################
-"""
-
-def readidb(filename: str) -> dict:
+    """
 
     def gen_seq_combinations(interaction_range,monomer_types):
         num = 2*(interaction_range+1)
@@ -132,12 +127,45 @@ def readidb(filename: str) -> dict:
             seq_param = dict()
             seq_param['seq']    = seq
             seq_param['vec']    = vec
-            seq_param['params'] = params
-        seq_params[seq] = seq_param
-        idb['seq_params'] = seq_params
+            seq_param['interaction'] = params
+            seq_params[seq] = seq_param
+        idb['params'] = seq_params
         return idb
+    
 
+def write_idb(filename: str, idbdict: dict, decimals=3) -> None:
 
+    with open(filename,'w') as f:
+        f.write('################################################################################\n')
+        f.write('############### SETUP ##########################################################\n')
+        f.write('################################################################################\n')
+        f.write('\n')
+        
+        f.write('interaction_range  = %d \n'%idbdict['interaction_range'])   
+        f.write('monomer_types      = %s \n'%idbdict['monomer_types'])  
+        f.write('discretization     = %.2f \n'%idbdict['disc_len'])  
+        f.write('avg_inconsist      = %d \n'%idbdict['avg_inconsist'])  
+        
+        f.write('\n')
+        f.write('################################################################################\n')
+        f.write('############ INTERACTIONS ######################################################\n')
+        f.write('################################################################################\n')
+        
+        for seq in sorted([key for key in idbdict['params'].keys()]):
+            seqparams = idbdict['params'][seq]
+            seq   = seqparams['seq']
+            vec   = seqparams['vec']
+            coups = seqparams['interaction']
+
+            f.write('\n')
+            f.write(seq+'\n')
+            # write couplings
+            for coup in coups:
+                line = f'\t{coup[0]}\t' + ' '.join([f'{c}' for c in coup]) + '\n'
+                f.write(line)
+            # write vec
+            f.write('\tvec\t\t\t' + ' '.join([str(round(val, decimals)) for val in vec])+'\n')
+        f.close()
 
 
 if __name__ == "__main__":
@@ -147,7 +175,7 @@ if __name__ == "__main__":
         sys.exit(0)
     fn_idb  = sys.argv[1]
 
-    idb = readidb(fn_idb)
+    idb = read_idb(fn_idb)
 
 
     print(idb['seq_params'][[key for key in idb['seq_params'].keys()][0]])
