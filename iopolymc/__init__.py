@@ -6,8 +6,6 @@ Provides methods to read PolyMC output and write PolyMC input files
 
 """
 
-# ~ __all__ = ["idb","restart","state","thetas","xyz"]
-
 from .scan_path import scan_path
 
 from .idb       import read_idb
@@ -40,5 +38,3 @@ from .pts2config import pts2config, config2triads, pts2xyz, pts2restart
 
 from .unique_oligomers import unique_oligomers
 from .unique_oligomers import UniqueOligomers
-
-
