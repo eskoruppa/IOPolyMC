@@ -1,6 +1,6 @@
 import numpy as np
 import sys,os
-from ._file_read import file_read
+from typing import List
 
 """
 ########################################################
@@ -22,64 +22,73 @@ On Execution:
 ########################################################
 """
 
-XYZ_NPY_EXT = '_xyz'
+XYZ_NPY_EXT = '_xyz.npy'
 
-def load_xyz(filename,savenpy=True,loadnpy=True):
-    fnpy = filename[:-4]+XYZ_NPY_EXT+'.npy'
-    if os.path.isfile(fnpy) and loadnpy:
-        xyz          = dict()
-        print(f"loading positions from '{fnpy}'")
-        xyz['pos']   = np.load(fnpy)
-        xyz['types'] = read_xyz_atomtypes(filename)
-    else:
-        xyz = read_xyz(filename)
-        if savenpy:
-            save_xyz_binary(fnpy,xyz['pos'])
+def load_xyz(filename: str,savenpy=True,loadnpy=True) -> dict:
+    if not os.path.isfile(filename):
+        raise FileNotFoundError( f"No such file or directory: '{filename}'" )
+    fnpy = os.path.splitext(filename)[0]+XYZ_NPY_EXT
+    if os.path.isfile(fnpy) and loadnpy and os.path.getmtime(fnpy) >= os.path.getmtime(filename):
+            xyz          = dict()
+            print(f"loading positions from '{fnpy}'")
+            xyz['pos']   = np.load(fnpy)
+            xyz['types'] = read_xyz_atomtypes(filename)
+            return xyz
+    xyz = read_xyz(filename)
+    if savenpy:
+        _save_xyz_binary(fnpy,xyz['pos'])
     return xyz
 
+def load_pos_of_type(filename: str, selected_types: List[str], savenpy=True,loadnpy=True) -> np.ndarray:
+    xyz = load_xyz(filename,savenpy=savenpy,loadnpy=savenpy)
+    ids = [id for id in range(len(xyz['types'])) if xyz['types'][id] in selected_types]
+    data = np.array([snap[ids] for snap in xyz['pos']])
+    return data
 
-def read_xyz(fn):
-    print(f"reading '{fn}'")
+def _linelist(line):
+    return [elem for elem in line.strip().split(' ') if elem != '']
+
+def read_xyz(filename: str) -> np.ndarray:
+    print(f"reading '{filename}'")
     data = list()
-    F = file_read(fn)
-    line = F.readline()
-    while line!='':
-        ll = F.linelist()
-        if len(ll)>=4 and ll[0]!='Atoms.':
-            snapshot = list()
-            while len(ll)>=4:
-                snapshot.append( [float(ft) for ft in ll[1:4]])
-                line = F.readline()
-                ll   = F.linelist()
-            data.append(snapshot)
-        line = F.readline()
+    with open(filename) as f:
+        line = f.readline()
+        while line!='':
+            ll = _linelist(line)
+            if len(ll)>=4 and ll[0]!='Atoms.':
+                snapshot = list()
+                while len(ll)>=4:
+                    snapshot.append( [float(ft) for ft in ll[1:4]])
+                    line = f.readline()
+                    ll   = _linelist(line)
+                data.append(snapshot)
+            line = f.readline()
     data = np.array(data)
-    
     xyz = dict()
     xyz['pos']   = data
-    xyz['types'] = read_xyz_atomtypes(fn)
+    xyz['types'] = read_xyz_atomtypes(filename)
     return xyz
     
-def read_xyz_atomtypes(fn):
+def read_xyz_atomtypes(filename: str) -> List:
     data = list()
-    F = file_read(fn)
-    line = F.readline()
-    num = 0
-    types = list()
-    while line!='':
-        ll = F.linelist()
-        if len(ll)>=4 and ll[0]!='Atoms.':
-            num += 1
-            if num > 1:
-                break
-            while len(ll)>=4:
-                types.append(ll[0])
-                line = F.readline()
-                ll   = F.linelist()
-        line = F.readline()
+    with open(filename) as f:
+        line = f.readline()
+        num = 0
+        types = list()
+        while line!='':
+            ll = _linelist(line)
+            if len(ll)>=4 and ll[0]!='Atoms.':
+                num += 1
+                if num > 1:
+                    break
+                while len(ll)>=4:
+                    types.append(ll[0])
+                    line = f.readline()
+                    ll   = _linelist(line)
+            line = f.readline()
     return types
     
-def write_xyz(outfn,data,add_extension=True):
+def write_xyz(outfn: str,data: dict,add_extension=True,append=False) -> None:
     """
     Writes configuration to xyz file
     
@@ -94,16 +103,29 @@ def write_xyz(outfn,data,add_extension=True):
     
     pos   = data['pos']
     types = data['types']
+    
+    if 'timesteps' in data.keys() and len(data['timesteps']) == len(data['pos']):
+        timesteps_provided = True
+    else:
+        timesteps_provided = False
+
     nbp   = len(pos[0])
-    with open(outfn,'w') as f:
+    if append:
+        mode = 'a'
+    else:
+        mode = 'w'
+    with open(outfn,mode) as f:
         for s,snap in enumerate(pos):
             f.write('%d\n'%nbp)
-            f.write('Atoms. Timestep: %d\n'%(s))
+            if timesteps_provided:
+                f.write('Atoms. Timestep: %d\n'%(data['timesteps'][s]))
+            else:
+                f.write('Atoms. Timestep: %d\n'%(s))
             for i in range(nbp):
                 f.write('%s %.4f %.4f %.4f\n'%(types[i],snap[i,0],snap[i,1],snap[i,2]))
     
-def save_xyz_binary(outname,data):
-    if outname[-4:] == '.npy':
+def _save_xyz_binary(outname: str,data: np.ndarray) -> None:
+    if os.path.splitext(outname)[-1] == '.npy':
         outn = outname
     else:
         outn = outname + '.npy'

@@ -20,7 +20,6 @@ from .xyz       import load_xyz
 from .xyz       import read_xyz
 from .xyz       import read_xyz_atomtypes
 from .xyz       import write_xyz
-from .xyz       import save_xyz_binary
 from .genpdb    import state2pdb
 from .genpdb    import gen_pdb
 from .input     import read_input

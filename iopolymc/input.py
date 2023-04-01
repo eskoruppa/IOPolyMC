@@ -2,6 +2,7 @@ import numpy as np
 import sys,os
 import glob
 from ast import literal_eval
+from typing import List
 
 """
 ########################################################
@@ -11,7 +12,7 @@ from ast import literal_eval
 ########################################################
 """
 
-def read_input(filename: str):
+def read_input(filename: str) -> dict:
     """
         Reads PolyMC input file and returns dictionary of contained arguments
     """
@@ -54,7 +55,7 @@ def write_input(filename: str,args: dict):
 ########################################################
 # query simulations
 
-def querysims(path: str, recursive=False, extension='in',sims=None,select=None):
+def querysims(path: str, recursive=False, extension='in',sims=None,select=None) -> List[dict]:
     """
         Queries directory and subdirectories (if recursive=True), for simulations and ready the input. Specified simulations 
         can be selected by passing a parameter dictionary via the argument select.
@@ -80,7 +81,7 @@ def querysims(path: str, recursive=False, extension='in',sims=None,select=None):
     return sims
 
 
-def init_querysims(path: str, recursive=False, extension='in'):
+def init_querysims(path: str, recursive=False, extension='in') -> List[dict]:
     """
         finds and reads all PolyMC input files and identifies other files belonging to the corresponding simulation. 
         returns list of dictionary, one dictionary for each simulation. The other corresponding simulation files are contained in
@@ -103,7 +104,7 @@ def init_querysims(path: str, recursive=False, extension='in'):
         sims.append(siminput)
     return sims
 
-def simfiles(infile: str,extension='in'):
+def simfiles(infile: str,extension='in') -> List[str]:
     basefn = infile.replace('.'+extension,'')
     allfns = glob.glob(basefn+'.*')
     return allfns
@@ -113,13 +114,13 @@ def simfiles(infile: str,extension='in'):
 ########################################################
 # extra funcs
 
-def _fast_scandir(path: str):
+def _fast_scandir(path: str) -> List[str]:
     subpaths= [f.path for f in os.scandir(path) if f.is_dir()]
     for path in list(subpaths):
         subpaths.extend(_fast_scandir(path))
     return subpaths
 
-def _simplest_type(s):
+def _simplest_type(s: str):
     try:
         return literal_eval(s)
     except:
@@ -128,6 +129,7 @@ def _simplest_type(s):
 ########################################################
 ########################################################
 ########################################################
+# testing
 
 if __name__ == "__main__":
     
