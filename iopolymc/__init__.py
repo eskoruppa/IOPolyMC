@@ -8,6 +8,8 @@ Provides methods to read PolyMC output and write PolyMC input files
 
 # ~ __all__ = ["idb","restart","state","thetas","xyz"]
 
+from .scan_path import scan_path
+
 from .idb       import readidb
 
 from .restart   import read_restart

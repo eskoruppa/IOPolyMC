@@ -27,7 +27,7 @@ On Execution:
 ########################################################
 """
 
-def load_state(filename):
+def load_state(filename: str) -> dict:
     """
         Loads data in state-file and saves positions, triads and Omegas as
         numpy binaries. Data is loaded from binary if binary already exists. 
@@ -69,7 +69,7 @@ def load_state(filename):
             
     return state
 
-def read_spec(filename):
+def read_spec(filename: str) -> dict:
     specs = dict()
     specs["pos_contained"]    = False
     specs["triads_contained"] = False
@@ -142,7 +142,7 @@ def read_spec(filename):
         specs["sigma"] = specs["delta_LK"]/Lk0
     return specs
 
-def read_state(filename): 
+def read_state(filename: str) -> dict: 
     """
         Reads state-file. 
     """

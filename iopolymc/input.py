@@ -61,7 +61,7 @@ def querysims(path: str, recursive=False, extension='in',sims=None,select=None) 
         can be selected by passing a parameter dictionary via the argument select.
     """
     if sims is None:
-        sims = init_querysims(path,recursive=recursive,extension=extension)
+        sims = _init_querysims(path,recursive=recursive,extension=extension)
     if select is not None:
         if not isinstance(select,dict):
             raise TypeError(f"Error in querysims: argument select needs to be a dictionary")
@@ -81,7 +81,7 @@ def querysims(path: str, recursive=False, extension='in',sims=None,select=None) 
     return sims
 
 
-def init_querysims(path: str, recursive=False, extension='in') -> List[dict]:
+def _init_querysims(path: str, recursive=False, extension='in') -> List[dict]:
     """
         finds and reads all PolyMC input files and identifies other files belonging to the corresponding simulation. 
         returns list of dictionary, one dictionary for each simulation. The other corresponding simulation files are contained in

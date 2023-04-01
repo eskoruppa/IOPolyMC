@@ -1,10 +1,11 @@
 import numpy as np
 import sys
+from typing import List
 
 
 RESTART_SEPERATOR = '###############################################################'
 
-def read_restart(filename):
+def read_restart(filename: str) -> List[dict]:
     """
         Returns a list of dictionaries (one for each snaoshot)
         Dictionaries contain keys:
@@ -23,7 +24,7 @@ def read_restart(filename):
     
     """
     
-    def read_snapshot(ssl):
+    def read_snapshot(ssl: List[str]) -> dict:
         sst = int(ssl[0].split(' ')[-1])
         tpe = ssl[1].split(' ')[-1] 
         nbp = int(ssl[2].split(' ')[-1]) 
@@ -61,7 +62,7 @@ def read_restart(filename):
     return snapshots
     
     
-def write_restart(filename,snapshots):
+def write_restart(filename: str, snapshots: List[dict]):
     """
         Write snapshots to restart file
         

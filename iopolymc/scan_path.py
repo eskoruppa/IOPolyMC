@@ -1,14 +1,19 @@
-from .state import *
+import sys, glob, os
+import numpy as np
+from typing import List
+from .state import read_spec
 
-def scan_path(path,ext):
+def scan_path(path: str, ext: str, recursive=False) -> List[str]:
+    """
+        Returns all state files in path
+    """
+    entries = list()
     if not os.path.exists(path):
         print("Path '%s' does not exist"%path)
-        return []
-    
-    entries = list()
-    statefiles = np.sort(glob.glob(path+"/*.%s"%ext))
+        return entries
+    statefiles = np.sort(glob.glob(path+"/*.%s"%ext),recursive=recursive)
     for stfn in statefiles:
-        specs = ReadSpec(stfn)
+        specs = read_spec(stfn)
         raw_fn = stfn[:-6]
         entries.append([raw_fn,specs])
     return entries

@@ -1,4 +1,5 @@
 import sys
+from typing import List
 
 """
 ########################################################
@@ -14,7 +15,7 @@ Read/readidb.py
 ########################################################
 """
 
-def readidb(filename):
+def readidb(filename: str) -> dict:
 
     def gen_seq_combinations(interaction_range,monomer_types):
         num = 2*(interaction_range+1)
@@ -31,7 +32,7 @@ def readidb(filename):
         iterate('',0)
         return seqs
 
-    def get_paramset_line_ids(lines,seqs):
+    def get_paramset_line_ids(lines: List[str],seqs: List[str]):
         seq_ids = list()
         missing = list()
         for seq in seqs:

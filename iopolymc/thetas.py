@@ -1,7 +1,7 @@
 import numpy as np
 import os,sys
 
-def load_thetas(filename):
+def load_thetas(filename: str) -> np.ndarray:
     npyfn = '.'.join(filename.split('.')[:-1])+'_thetas.npy'
     if os.path.isfile(npyfn):
         print(f"loading thetas from '{npyfn}'")
@@ -11,7 +11,7 @@ def load_thetas(filename):
     np.save(npyfn,Thetas)
     return Thetas
 
-def read_thetas(filename):
+def read_thetas(filename: str) -> np.ndarray:
     print(f"reading '{filename}'")
     Thetas = np.loadtxt(filename)
     num_Thetas = len(Thetas)

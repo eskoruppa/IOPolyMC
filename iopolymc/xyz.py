@@ -51,7 +51,7 @@ def load_pos_of_type(filename: str, selected_types: List[str], savenpy=True,load
 def _linelist(line):
     return [elem for elem in line.strip().split(' ') if elem != '']
 
-def read_xyz(filename: str) -> np.ndarray:
+def read_xyz(filename: str) -> dict:
     print(f"reading '{filename}'")
     data = list()
     with open(filename) as f:
