@@ -3,10 +3,10 @@ import sys
 from typing import List
 
 
-def unique_oligomers(num_bp: int,omit_equiv=True) -> List[str]:
+def dna_oligomers(num_bp: int,omit_equiv=True) -> List[str]:
     uo = UniqueOligomers(omit_equiv=omit_equiv)
     return uo.get_oligomers(num_bp)
-    
+
 class UniqueOligomers:
     def __init__(self, omit_equiv=True):
         self.bases = 'atcg'
