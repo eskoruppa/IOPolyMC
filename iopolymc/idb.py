@@ -97,40 +97,39 @@ def read_idb(filename: str) -> dict:
             raise Exception('Inconsistent IDB file')
 
         num_interactions = 1+2*interaction_range
-
         seq_params = dict()
-        ids  = [seq_id[1] for seq_id in seq_ids]
-        seqs = [seq_id[0] for seq_id in seq_ids]
-        for i in range(len(ids)):
-            if i == len(ids)-1:
-                till = len(lines)
-            else:
-                till = ids[i+1]
-            paramlines = lines[ids[i]:till]
+        nlines = num_interactions+2
+        for seq_id in seq_ids:
+            fseq,lid = seq_id
 
-            seq = seqs[i]
+            part_lines = list()
+            while len(part_lines) < nlines:
+                if lines[lid].strip() != '' and lines[lid].strip()[0] != '#':
+                    part_lines.append(lines[lid])
+                lid += 1
+            
+            seq = part_lines[0].strip()
+            if seq not in seqs:
+                raise Exception(f"Unexpected sequence '{seq}' encountered.")
+            if seq != fseq:
+                raise Exception(f"Error in line identification")
             params = list()
-            vec    = None
-            for line in paramlines:
-                if len(stripsplit(line)) > 1:
-                    splitline = stripsplit(line)
-                    if splitline[0].lower() == 'vec':
-                        vec = [float(v) for v in splitline[1:]]
-                    else:
-                        param = [splitline[0]] + [float(v) for v in splitline[1:]]
-                        params.append(param)
-
-            if len(params) != num_interactions:
-                print('Sequence "%s" requires %d interaction parameter sets, %d given'%(seq,num_interactions,len(params)))
-                raise Exception('Inconsistent IDB file')
+            for i in range(num_interactions):
+                splitline = [elem.strip() for elem in part_lines[1+i].strip().replace('\t',' ').split(' ') if elem.strip() != '']
+                param = [splitline[0]] + [float(v) for v in splitline[1:]]
+                params.append(param)
+            splitline = [elem.strip() for elem in part_lines[-1].strip().replace('\t',' ').split(' ') if elem.strip() != '']
+            vec = [float(v) for v in splitline[1:]]
 
             seq_param = dict()
             seq_param['seq']    = seq
             seq_param['vec']    = vec
             seq_param['interaction'] = params
             seq_params[seq] = seq_param
+
         idb['params'] = seq_params
         return idb
+
     
 
 def write_idb(filename: str, idbdict: dict, decimals=3) -> None:
@@ -161,7 +160,7 @@ def write_idb(filename: str, idbdict: dict, decimals=3) -> None:
             f.write(seq+'\n')
             # write couplings
             for coup in coups:
-                line = f'\t{coup[0]}\t' + ' '.join([f'{c}' for c in coup]) + '\n'
+                line = f'\t{coup[0]}\t' + ' '.join([f'{round(c, decimals)}' for c in coup[1:]]) + '\n'
                 f.write(line)
             # write vec
             f.write('\tvec\t\t\t' + ' '.join([str(round(val, decimals)) for val in vec])+'\n')
