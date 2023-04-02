@@ -37,4 +37,5 @@ from .input     import simfiles
 from .pts2config import pts2config, config2triads, pts2xyz, pts2restart
 
 from .unique_oligomers import dna_oligomers
+from .unique_oligomers import complementary_sequence
 from .unique_oligomers import UniqueOligomers
