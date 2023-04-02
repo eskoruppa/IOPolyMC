@@ -41,9 +41,9 @@ class UniqueOligomers:
             return dimer, seq
         return '', seq
     
-    def invert_seq(self, seq):
-        comp_dict = {'a': 't', 't': 'a', 'c': 'g', 'g': 'c'}
-        return ''.join(comp_dict[base] for base in seq[::-1])
+def complementary_sequence(sequence):
+    comp_dict = {'a': 't', 't': 'a', 'c': 'g', 'g': 'c'}
+    return ''.join(comp_dict[base] for base in sequence.lower()[::-1])
 
 
 if __name__ == "__main__":
