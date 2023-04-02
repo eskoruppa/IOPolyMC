@@ -1,6 +1,5 @@
 import numpy as np
-import os,sys
-from ._file_read import file_read
+import os
 from .simplest_type import simplest_type
 
 
@@ -8,8 +7,6 @@ def load_state(filename: str) -> dict:
     """
         Loads data in state-file and saves positions, triads and Omegas as
         numpy binaries. Data is loaded from binary if binary already exists. 
-        
-        Use to speed up loadtime
     """
     
     pos_fnpy    = os.path.splitext(filename)[0] + '_pos.npy'
@@ -50,6 +47,7 @@ def load_state(filename: str) -> dict:
             
     return state
 
+
 def read_spec(fn: str) -> dict:
     specs = dict()
     specs["pos_contained"]    = False
@@ -79,23 +77,24 @@ def read_spec(fn: str) -> dict:
     specs["sigma"] = specs["delta_LK"]/Lk0
     return specs
 
+
 def read_state(fn: str) -> dict():
     """
         Reads state-file. 
     """
     specs = read_spec(fn)
     num_segs = specs['Segments']
-
     all_pos = list()
     all_triads = list()
     all_Omegas = list()
-
     with open(fn,'r') as f:
         line = f.readline()
+        # skip header
         while 'snapshot' not in line.lower():
             line = f.readline()
-
+        # loop over snapshots
         while line != '':
+            # read positions
             if specs['pos_contained']:
                 pos = np.zeros((num_segs,3))
                 for i in range(num_segs):
@@ -105,15 +104,23 @@ def read_state(fn: str) -> dict():
                     pos[i,1] = float(ll[1])
                     pos[i,2] = float(ll[2])
                 all_pos.append( pos )
+            # read triads
             if specs['triads_contained']:
                 triads = np.zeros((num_segs,3,3))
                 for i in range(num_segs):
                     line = f.readline()
                     ll = _linelist(line)
-                    triads[i,0] = [float(ll[0]),float(ll[1]),float(ll[2])]
-                    triads[i,1] = [float(ll[3]),float(ll[4]),float(ll[5])]
-                    triads[i,2] = [float(ll[6]),float(ll[7]),float(ll[8])]
+                    triads[i,0,0] = float(ll[0])
+                    triads[i,0,1] = float(ll[1])
+                    triads[i,0,2] = float(ll[2])
+                    triads[i,1,0] = float(ll[3])
+                    triads[i,1,1] = float(ll[4])
+                    triads[i,1,2] = float(ll[5])
+                    triads[i,2,0] = float(ll[6])
+                    triads[i,2,1] = float(ll[7])
+                    triads[i,2,2] = float(ll[8])
                 all_triads.append(triads)
+            # read Angles
             if specs['Omegas_contained']:
                 Omegas = np.zeros((num_segs,3))
                 for i in range(num_segs):
@@ -124,46 +131,19 @@ def read_state(fn: str) -> dict():
                     Omegas[i,2] = float(ll[2])
                 all_Omegas.append( Omegas )
             line = f.readline()
-
     if specs['pos_contained']:
         specs['pos'] = np.array(all_pos)
     if specs['triads_contained']:
         specs['triads'] = np.array(all_triads)
     if specs['Omegas_contained']:
         specs['Omegas'] = np.array(all_Omegas)
-    
     return specs
-    
+
     
 def _save_pos(outname,snapshots):
-    if outname[-4:] == '.npy':
-        outn = outname
-    else:
-        outn = outname + '.npy'
-    np.save(outn,snapshots)
-
-def _remove_newline(string):
-    if string[-1] == "\n":
-        return string[:-1]
+    if os.path.splitext(outname)[-1] != 'npy':
+        outname = outname + '.npy'
+    np.save(outname,snapshots)
 
 def _linelist(string):
     return [entry for entry in string.strip().split(' ') if entry != '']
-
-if __name__ == "__main__":
-    
-    if len(sys.argv) < 2:
-        print("usage: python %s filename"%sys.argv[0])
-        sys.exit(0)
-    fn  = sys.argv[1]
-    
-    spec = read_spec(fn)
-    for key,val in spec.items():
-        print( key, "=", val )
-    
-    # state = load_state(fn)
-    # pos = state['pos']
-    # # ~ fnpy = fn.split('.')[0]+'.npy'
-    # # ~ _save_pos(fnpy,pos)
-        
-    # print("%d snapshots found"%len(pos))
-    
