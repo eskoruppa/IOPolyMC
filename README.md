@@ -5,8 +5,10 @@ Provides methods to read PolyMC output and write PolyMC input files
 
 ## Install
 
-pip install .
-
+```console
+git clone git@github.com:eskoruppa/IOPolyMC.git
+pip install IOPolyMC/.
+```
 
 # Use
 
