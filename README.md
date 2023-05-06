@@ -1,5 +1,3 @@
-![GitHub last commit](https://img.shields.io/github/last-commit/eskoruppa/IOPolyMC)
-
 # IOPolyMC
 Provides methods to read PolyMC output and write PolyMC input files
 
