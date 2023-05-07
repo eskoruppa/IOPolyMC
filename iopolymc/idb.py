@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 from typing import List
 
 def read_idb(filename: str) -> dict:
@@ -160,10 +161,10 @@ def write_idb(filename: str, idbdict: dict, decimals=3) -> None:
             f.write(seq+'\n')
             # write couplings
             for coup in coups:
-                line = f'\t{coup[0]}\t' + ' '.join([f'{round(c, decimals)}' for c in coup[1:]]) + '\n'
+                line = f'\t{coup[0]}\t' + ' '.join([f'{np.round(c, decimals)}' for c in coup[1:]]) + '\n'
                 f.write(line)
             # write vec
-            f.write('\tvec\t\t\t' + ' '.join([str(round(val, decimals)) for val in vec])+'\n')
+            f.write('\tvec\t\t\t' + ' '.join([str(np.round(val, decimals)) for val in vec])+'\n')
         f.close()
 
 
