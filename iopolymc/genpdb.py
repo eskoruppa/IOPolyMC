@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import pkg_resources
-from iopolymc.state  import read_state
+from .state  import read_state
 
 BPDICTS_FN = 'database/bpdicts'
 
