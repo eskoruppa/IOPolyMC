@@ -4,7 +4,7 @@ import iopolymc as io
 
 if __name__ == "__main__":
 
-    idb = io.read_idb('test/random.idb')
+    idb = io.read_idb('test/test.idb')
 
     for key in idb:
         print('########')
@@ -15,4 +15,4 @@ if __name__ == "__main__":
         print(idb['params'][key])
 
     
-    io.write_idb('test/test.idb',idb)
+    io.write_idb('test/test_out.idb',idb)

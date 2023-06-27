@@ -8,7 +8,7 @@ def dna_oligomers(num_bp: int,omit_equiv=True) -> List[str]:
     return uo.get_oligomers(num_bp)
 
 class UniqueOligomers:
-    def __init__(self, omit_equiv=True):
+    def __init__(self, omit_equiv: bool=True):
         self.bases = 'atcg'
         self.omit_equiv = omit_equiv
 
@@ -17,7 +17,7 @@ class UniqueOligomers:
         self._seqloop('', 0, num_bp)
         return self.seqlist
 
-    def _seqloop(self, seq, current, num_bp):
+    def _seqloop(self, seq: str, current: int, num_bp: int):
         current += 1
         for i in range(len(self.bases)):
             new_seq = seq + self.bases[i]
@@ -27,11 +27,11 @@ class UniqueOligomers:
                 if not (self.omit_equiv and self.invert_seq(new_seq) in self.seqlist):
                     self.seqlist.append(new_seq)
 
-    def invert_seq(self, seq):
+    def invert_seq(self, seq: str):
         comp_dict = {'a': 't', 't': 'a', 'c': 'g', 'g': 'c'}
         return ''.join(comp_dict[base] for base in seq[::-1])
 
-    def get_mid_dimer(self, seq):
+    def get_mid_dimer(self, seq: str):
         if len(seq) % 2 == 0:
             unique_dimers = sorted(self.get_oligomers(2))
             dimer = seq[len(seq)//2-1:len(seq)//2+1]
@@ -41,7 +41,7 @@ class UniqueOligomers:
             return dimer, seq
         return '', seq
     
-def complementary_sequence(sequence):
+def complementary_sequence(sequence: str):
     comp_dict = {'a': 't', 't': 'a', 'c': 'g', 'g': 'c'}
     return ''.join(comp_dict[base] for base in sequence.lower()[::-1])
 

@@ -1,13 +1,16 @@
 import numpy as np
 import os
 from .simplest_type import simplest_type
+from typing import List,Dict,Any
 
 
-def load_state(filename: str) -> dict:
+def load_state(filename: str, savenpy: bool=True, loadnpy: bool=True) -> Dict[str,Any]:
     """
         Loads data in state-file and saves positions, triads and Omegas as
         numpy binaries. Data is loaded from binary if binary already exists. 
     """
+    if not os.path.isfile(filename):
+        raise FileNotFoundError( f"No such file or directory: '{filename}'" )
     
     pos_fnpy    = os.path.splitext(filename)[0] + '_pos.npy'
     triads_fnpy = os.path.splitext(filename)[0] + '_triads.npy'
@@ -25,7 +28,7 @@ def load_state(filename: str) -> dict:
         if not os.path.isfile(Omegas_fnpy) or (os.path.getmtime(Omegas_fnpy) < os.path.getmtime(filename)):
             all_found = False
 
-    if all_found:
+    if loadnpy and all_found:
         print('quickload')
         if state['pos_contained']:
             print(f"loading positions from '{pos_fnpy}'")
@@ -38,17 +41,17 @@ def load_state(filename: str) -> dict:
             state['Omegas'] = np.load(Omegas_fnpy)
     else:
         state = read_state(filename)
-        if state['pos_contained']:
-            _save_pos(pos_fnpy,state['pos'])
-        if state['triads_contained']:
-            _save_pos(triads_fnpy,state['triads'])
-        if state['Omegas_contained']:
-            _save_pos(Omegas_fnpy,state['Omegas'])
-            
+        if savenpy:
+            if state['pos_contained']:
+                _save_npy(pos_fnpy,state['pos'])
+            if state['triads_contained']:
+                _save_npy(triads_fnpy,state['triads'])
+            if state['Omegas_contained']:
+                _save_npy(Omegas_fnpy,state['Omegas'])
     return state
 
 
-def read_spec(fn: str) -> dict:
+def read_spec(fn: str) -> Dict[str,Any]:
     specs = dict()
     specs["pos_contained"]    = False
     specs["triads_contained"] = False
@@ -78,7 +81,7 @@ def read_spec(fn: str) -> dict:
     return specs
 
 
-def read_state(fn: str) -> dict():
+def read_state(fn: str) -> Dict[str,Any]:
     """
         Reads state-file. 
     """
@@ -140,10 +143,10 @@ def read_state(fn: str) -> dict():
     return specs
 
     
-def _save_pos(outname,snapshots):
-    if os.path.splitext(outname)[-1] != 'npy':
+def _save_npy(outname: str, snapshots: int) -> None:
+    if os.path.splitext(outname)[-1] != '.npy':
         outname = outname + '.npy'
     np.save(outname,snapshots)
 
-def _linelist(string):
+def _linelist(string: str) -> List[str]:
     return [entry for entry in string.strip().split(' ') if entry != '']

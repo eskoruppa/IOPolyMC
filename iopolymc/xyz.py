@@ -1,15 +1,8 @@
 #!/bin/env python3
 
 import os,sys
-from typing import List
-
-
-
-try:
-    import numpy as np
-except ModuleNotFoundError:
-    print("numpy not installed. Please install numpy")
-    sys.exit("terminated")
+from typing import List, Dict, Any
+import numpy as np
 
 """
 ########################################################
@@ -27,11 +20,11 @@ except ModuleNotFoundError:
 
 XYZ_NPY_EXT = '_xyz.npy'
 
-def load_xyz(filename: str,savenpy=True,loadnpy=True) -> dict:
+def load_xyz(filename: str,savenpy: bool=True,loadnpy: bool=True) -> Dict[str,Any]:
     if not os.path.isfile(filename):
         raise FileNotFoundError( f"No such file or directory: '{filename}'" )
     fnpy = os.path.splitext(filename)[0]+XYZ_NPY_EXT
-    if os.path.isfile(fnpy) and loadnpy and os.path.getmtime(fnpy) >= os.path.getmtime(filename):
+    if loadnpy and os.path.isfile(fnpy) and os.path.getmtime(fnpy) >= os.path.getmtime(filename):
             xyz          = dict()
             print(f"loading positions from '{fnpy}'")
             xyz['pos']   = np.load(fnpy)
@@ -42,16 +35,16 @@ def load_xyz(filename: str,savenpy=True,loadnpy=True) -> dict:
         _save_xyz_binary(fnpy,xyz['pos'])
     return xyz
 
-def load_pos_of_type(filename: str, selected_types: List[str], savenpy=True,loadnpy=True) -> np.ndarray:
+def load_pos_of_type(filename: str, selected_types: List[str], savenpy: bool=True,loadnpy: bool=True) -> np.ndarray:
     xyz = load_xyz(filename,savenpy=savenpy,loadnpy=savenpy)
     ids = [id for id in range(len(xyz['types'])) if xyz['types'][id] in selected_types]
     data = np.array([snap[ids] for snap in xyz['pos']])
     return data
 
-def _linelist(line):
+def _linelist(line: str) -> List[str]:
     return [elem for elem in line.strip().split(' ') if elem != '']
 
-def read_xyz(filename: str) -> dict:
+def read_xyz(filename: str) -> Dict[str,Any]:
     print(f"reading '{filename}'")
     data = list()
     with open(filename) as f:
@@ -91,7 +84,7 @@ def read_xyz_atomtypes(filename: str) -> List:
             line = f.readline()
     return types
     
-def write_xyz(outfn: str,data: dict,add_extension=True,append=False) -> None:
+def write_xyz(outfn: str, data: dict, add_extension: bool=True, append: bool=False) -> None:
     """
     Writes configuration to xyz file
     

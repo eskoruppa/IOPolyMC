@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from typing import List
+from typing import List, Dict, Any
 
 def read_idb(filename: str) -> dict:
     """
@@ -13,7 +13,7 @@ def read_idb(filename: str) -> dict:
     - seq_params (dict with oligomer types (key) + 3 arguments: types, vec (groundstate), params (identifier model + list of model parameters))
     """
 
-    def gen_seq_combinations(interaction_range,monomer_types):
+    def gen_seq_combinations(interaction_range: int, monomer_types: str) -> List[str]:
         num = 2*(interaction_range+1)
         seqs = list()
         def iterate(seq,pos):
@@ -24,11 +24,10 @@ def read_idb(filename: str) -> dict:
                     iterate(added_seq,nextpos)
                 else:
                     seqs.append(added_seq)
-
         iterate('',0)
         return seqs
 
-    def get_paramset_line_ids(lines: List[str],seqs: List[str]):
+    def get_paramset_line_ids(lines: List[str],seqs: List[str]) -> List[List[List]]:
         seq_ids = list()
         missing = list()
         for seq in seqs:
@@ -133,7 +132,7 @@ def read_idb(filename: str) -> dict:
 
     
 
-def write_idb(filename: str, idbdict: dict, decimals=3) -> None:
+def write_idb(filename: str, idbdict: Dict[str,Any], decimals=3) -> None:
 
     with open(filename,'w') as f:
         f.write('################################################################################\n')

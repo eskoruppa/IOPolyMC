@@ -5,7 +5,7 @@ from .restart import write_restart
 
 # import iopolymc
 
-def pts2config(pts : np.ndarray, disc_len : float, closed = False, numbp = None, translate_first = True) -> np.ndarray:
+def pts2config(pts : np.ndarray, disc_len: float, closed = False, numbp: int=None, translate_first: bool=True) -> np.ndarray:
     """
         Interpolates 3D polymer config between points.
         Arguments:
@@ -24,7 +24,7 @@ def pts2config(pts : np.ndarray, disc_len : float, closed = False, numbp = None,
                         Default: True
     """
 
-    def find_corner_pt(p1 : np.ndarray, B : np.ndarray, C : np.ndarray, disc_len : float) -> np.ndarray:
+    def find_corner_pt(p1: np.ndarray, B: np.ndarray, C: np.ndarray, disc_len: float) -> np.ndarray:
         """
             subsidiary function for pts2config
         """
@@ -60,7 +60,7 @@ def pts2config(pts : np.ndarray, disc_len : float, closed = False, numbp = None,
     config = list()
     config.append(pts[0])
     ptid   = 1
-    ptA     = pts[0]
+    # ptA     = pts[0]
     while ptid < len(pts):
         ptA = pts[ptid-1]
         ptB = pts[ptid]
@@ -158,7 +158,7 @@ def config2triads(config : np.ndarray) -> np.ndarray:
     triads[-1] = triads[-2]
     return triads
 
-def pts2xyz(outfn : str, pts : np.ndarray, disc_len : float, closed = False, numbp = None, translate_first = True, sequence = None, default_type = 'C', snapshotid = 0):
+def pts2xyz(outfn : str, pts : np.ndarray, disc_len : float, numbp: int=None, sequence:str=None, default_type:str='C'):
     config = pts2config(pts,disc_len,numbp=numbp)
     dat    = {'pos' : np.array([config])}
     if sequence is None:
@@ -166,7 +166,7 @@ def pts2xyz(outfn : str, pts : np.ndarray, disc_len : float, closed = False, num
     write_xyz(outfn,dat)
 
 
-def pts2restart(outfn : str, pts : np.ndarray, disc_len : float, closed = False, numbp = None, translate_first = True, sequence = None, default_type = 'a', snapshotid = 0):
+def pts2restart(outfn : str, pts : np.ndarray, disc_len : float, closed: bool=False, numbp: int=None, sequence: str=None, default_type: str='a', snapshotid: int=0):
     config = pts2config(pts,disc_len,numbp=numbp)
     triads = config2triads(config)
 

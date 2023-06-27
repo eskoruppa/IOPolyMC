@@ -1,11 +1,10 @@
 import numpy as np
 import sys
-from typing import List
-
+from typing import List, Dict, Any
 
 RESTART_SEPERATOR = '###############################################################'
 
-def read_restart(filename: str) -> List[dict]:
+def read_restart(filename: str) -> List[Dict[str,Any]]:
     """
         Returns a list of dictionaries (one for each snaoshot)
         Dictionaries contain keys:
@@ -62,7 +61,7 @@ def read_restart(filename: str) -> List[dict]:
     return snapshots
     
     
-def write_restart(filename: str, snapshots: List[dict]):
+def write_restart(filename: str, snapshots: List[dict]) -> None:
     """
         Write snapshots to restart file
         

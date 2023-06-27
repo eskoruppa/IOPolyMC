@@ -1,11 +1,14 @@
+from typing import Dict, List, Any
+
 import json
 import numpy as np
 import pkg_resources
 from .state  import read_state
 
+
 BPDICTS_FN = 'database/bpdicts'
 
-def _load_bpdicts(fn: str) -> dict:
+def _load_bpdicts(fn: str) -> Dict[str,Any]:
     """
     Parameters:
     fn : str
@@ -18,7 +21,7 @@ def _load_bpdicts(fn: str) -> dict:
         bpdicts = json.load(f)
     return bpdicts
 
-def _DNA_residue_name(residue_name):
+def _DNA_residue_name(residue_name: str):
     """
         converts basename into pdb residue name
     """
@@ -37,7 +40,7 @@ def _build_pdb_atomline(atomID: int,
                        residue_name: str,
                        strandID: str,
                        residueID: int,
-                       atom_pos: list[float]) -> str:
+                       atom_pos: List[float]) -> str:
     """
         generates pdb line for atom
     """
@@ -84,7 +87,7 @@ def _rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
     R_z[2, 2] = 1
     return np.matmul(triad, R_z)
 
-def _random_sequenceuence(N: int) -> list[str]:
+def _random_sequenceuence(N: int) -> List[str]:
     """
         generates random base sequence of length N
     """
@@ -97,7 +100,7 @@ def _discretization_length(conf: np.ndarray) -> np.ndarray:
     vecs  = np.diff(conf,axis=ndims-2)
     return np.mean(np.linalg.norm(vecs,axis=ndims-1))
 
-def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, sequence = None, center=True):
+def gen_pdb(outfn: str, positions: np.ndarray, triads: np.ndarray,bpdicts: Dict[str,Any], sequence: str=None, center: bool=True):
     """
         positions needs to be in nm!
     """
@@ -182,7 +185,7 @@ def gen_pdb(outfn: str, positions: np.ndarray,triads: np.ndarray,bpdicts: dict, 
 
         f.close()
 
-def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn=None, sequence=None, center=True):
+def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn: str=None, sequence: str=None, center: bool=True):
     """
         Converts a snapshot from a polymc state file into pdb format
 
