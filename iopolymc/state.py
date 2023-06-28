@@ -85,9 +85,14 @@ def read_state(fn: str) -> Dict[str,Any]:
     """
         Reads state-file. 
     """
-    print(fn)
-    
+    print('###################')
+    print(fn)    
     specs = read_spec(fn)
+    
+    print(specs['pos_contained'])
+    print(specs['triads_contained'])
+    print(specs['Omegas_contained'])
+    
     num_segs = specs['Segments']
     all_pos = list()
     all_triads = list()
