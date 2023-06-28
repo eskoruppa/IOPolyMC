@@ -9,6 +9,7 @@ import glob
 if __name__ == "__main__":
 
     state_fn = 'test/test.state'
+    # state_fn = 'test/s_0p0400_run1.state'
 
     t1 = time.time()
     state = io.read_state(state_fn)

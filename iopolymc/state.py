@@ -85,6 +85,8 @@ def read_state(fn: str) -> Dict[str,Any]:
     """
         Reads state-file. 
     """
+    print(fn)
+    
     specs = read_spec(fn)
     num_segs = specs['Segments']
     all_pos = list()
