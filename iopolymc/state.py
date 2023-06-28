@@ -85,18 +85,12 @@ def read_state(fn: str) -> Dict[str,Any]:
     """
         Reads state-file. 
     """
-    print('###################')
-    print(fn)    
-    specs = read_spec(fn)
-    
-    print(specs['pos_contained'])
-    print(specs['triads_contained'])
-    print(specs['Omegas_contained'])
-    
+    specs = read_spec(fn)    
     num_segs = specs['Segments']
     all_pos = list()
     all_triads = list()
     all_Omegas = list()
+    
     with open(fn,'r') as f:
         line = f.readline()
         # skip header
@@ -133,7 +127,7 @@ def read_state(fn: str) -> Dict[str,Any]:
             # read Angles
             if specs['Omegas_contained']:
                 Omegas = np.zeros((num_segs,3))
-                for i in range(num_segs):
+                for i in range(num_segs-1):
                     line = f.readline()
                     ll = _linelist(line)
                     Omegas[i,0] = float(ll[0])
