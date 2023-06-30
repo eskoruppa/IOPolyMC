@@ -104,9 +104,9 @@ def _init_querysims(path: str, recursive=False, extension="in") -> List[dict]:
     returns list of dictionary, one dictionary for each simulation. The other corresponding simulation files are contained in
     the dictionary under the key 'files'
     """
+    infiles = list()
     if recursive:
         subpaths = [path] + _fast_scandir(path)
-        infiles = list()
         for subpath in subpaths:
             infiles += glob.glob(os.path.join(subpath, "*." + extension))
     else:
