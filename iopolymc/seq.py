@@ -25,7 +25,7 @@ def read_seq(seqfn: str) -> dict[str,str]:
 ##############################################################################
 ##############################################################################
 
-def write_seq(seqfn: str, seq: str, opt: str|None=None) -> None:
+def write_seq(seqfn: str, seq: str, opt: str=None) -> None:
     with open(seqfn,'w') as f:
         if opt is not None and opt != IOPOLYMC_SEQ_PATTERN_EXACT:
             f.write(opt+'\n')

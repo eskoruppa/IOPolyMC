@@ -64,10 +64,10 @@ def write_input(filename: str, args: Dict[str, Any]):
 
 def querysims(
     path: str,
-    select: Dict[str, Any] | None = None,
+    select: Dict[str, Any] = None,
     recursive=False,
     extension="in",
-    sims: List[Dict[str, Any]] | None = None,
+    sims: List[Dict[str, Any]] = None,
 ) -> List[dict]:
     """
     Queries directory and subdirectories (if recursive=True), for simulations and ready the input. Specified simulations
