@@ -18,7 +18,7 @@ from .state     import load_state
 from .state     import read_spec
 from .state     import read_state
 
-from .seq       import read_seq
+from .seq       import read_seq, write_seq
 
 from .thetas    import load_thetas
 from .thetas    import read_thetas
