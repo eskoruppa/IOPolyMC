@@ -137,3 +137,4 @@ if __name__ == "__main__":
     xyz  = load_xyz(fin)
     types = read_xyz_atomtypes(fin)
     print(f'number of atoms = {len(types)}')
+

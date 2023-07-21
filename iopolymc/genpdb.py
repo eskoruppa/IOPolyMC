@@ -1,12 +1,13 @@
 from typing import Dict, List, Any
-
-import json
+import json,sys
 import numpy as np
 import pkg_resources
 from .state  import read_state
 
-
 BPDICTS_FN = 'database/bpdicts'
+
+###########################################################################################################################
+###########################################################################################################################
 
 def _load_bpdicts(fn: str) -> Dict[str,Any]:
     """
@@ -21,6 +22,9 @@ def _load_bpdicts(fn: str) -> Dict[str,Any]:
         bpdicts = json.load(f)
     return bpdicts
 
+###########################################################################################################################
+###########################################################################################################################
+
 def _DNA_residue_name(residue_name: str):
     """
         converts basename into pdb residue name
@@ -34,6 +38,9 @@ def _DNA_residue_name(residue_name: str):
     if residue_name.lower() == "c":
         return "DC"
     return ''
+
+###########################################################################################################################
+###########################################################################################################################
 
 def _build_pdb_atomline(atomID: int,
                        atom_name: str,
@@ -53,6 +60,9 @@ def _build_pdb_atomline(atomID: int,
               _leftshiftstring(8, "%.3f" % atom_pos[2]) + " \n"
     return pdbline
 
+###########################################################################################################################
+###########################################################################################################################
+
 def _build_pdb_terline(atomID: int , residue_name: str, strandID: str, residueID: int) -> str:
     """
         generates TER line for pdb strand
@@ -64,6 +74,8 @@ def _build_pdb_terline(atomID: int , residue_name: str, strandID: str, residueID
               _leftshiftstring(4, str(residueID)) + "    \n"
     return pdbline
 
+###########################################################################################################################
+###########################################################################################################################
 
 def _leftshiftstring(total_chars: int, string: str) -> str:
     """
@@ -74,6 +86,9 @@ def _leftshiftstring(total_chars: int, string: str) -> str:
     for i in range(total_chars - chars):
         shifted_str += " "
     return shifted_str + string
+
+###########################################################################################################################
+###########################################################################################################################
 
 def _rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
     """
@@ -87,6 +102,9 @@ def _rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
     R_z[2, 2] = 1
     return np.matmul(triad, R_z)
 
+###########################################################################################################################
+###########################################################################################################################
+
 def _random_sequenceuence(N: int) -> List[str]:
     """
         generates random base sequence of length N
@@ -94,11 +112,17 @@ def _random_sequenceuence(N: int) -> List[str]:
     basetypes = ['A','T','C','G']
     return [basetypes[bt] for bt in np.random.randint(4, size=N)]
 
+###########################################################################################################################
+###########################################################################################################################
+
 def _discretization_length(conf: np.ndarray) -> np.ndarray:
     """ returns lengths of vectors """
     ndims = len(np.shape(conf))
     vecs  = np.diff(conf,axis=ndims-2)
     return np.mean(np.linalg.norm(vecs,axis=ndims-1))
+
+###########################################################################################################################
+###########################################################################################################################
 
 def gen_pdb(outfn: str, positions: np.ndarray, triads: np.ndarray,bpdicts: Dict[str,Any], sequence: str=None, center: bool=True):
     """
@@ -182,8 +206,10 @@ def gen_pdb(outfn: str, positions: np.ndarray, triads: np.ndarray,bpdicts: Dict[
                 f.write(pdbline)
         pdbline = _build_pdb_terline(atomID, residue_name, strandID, residueID)
         f.write(pdbline)
-
         f.close()
+
+###########################################################################################################################
+###########################################################################################################################
 
 def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn: str=None, sequence: str=None, center: bool=True):
     """
@@ -221,3 +247,23 @@ def state2pdb(statefn: str, outfn: str, snapshot: int ,bpdicts_fn: str=None, seq
     pos    = conf[snapshot]
     triads = triads[snapshot]
     gen_pdb(outfn, pos, triads, bpdicts, sequence=sequence)
+
+###########################################################################################################################
+###########################################################################################################################
+###########################################################################################################################
+
+if __name__ == "__main__":
+
+    if len(sys.argv) < 4:
+        print("usage: python %s fin fout snapshot"%sys.argv[0])
+        sys.exit(0)
+
+    statefn  = sys.argv[1]
+    fout     = sys.argv[2]
+    snapshot = int(sys.argv[3])
+
+    seq = None
+    if len(sys.argv) > 4:
+        seq = sys.argv[4]
+
+    state2pdb(statefn,fout,snapshot,sequence=seq)

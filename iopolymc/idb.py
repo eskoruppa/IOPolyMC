@@ -167,14 +167,17 @@ def write_idb(filename: str, idbdict: Dict[str,Any], decimals=3) -> None:
         f.close()
 
 
+
 if __name__ == "__main__":
 
-    if len(sys.argv) < 2:
-        print("usage: python %s idbfn"%sys.argv[0])
-        sys.exit(0)
-    fn_idb  = sys.argv[1]
+    idb = read_idb('test/test.idb')
 
-    idb = read_idb(fn_idb)
+    for key in idb:
+        print('########')
+        print(key)
 
+    for key in idb['params'].keys():
+        print(key)
+        print(idb['params'][key])
 
-    print(idb['seq_params'][[key for key in idb['seq_params'].keys()][0]])
+    write_idb('test/test_out.idb',idb)

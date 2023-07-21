@@ -1,5 +1,5 @@
 import numpy as np
-import os
+import os,time,glob
 from .simplest_type import simplest_type
 from typing import List,Dict,Any
 
@@ -151,3 +151,28 @@ def _save_npy(outname: str, snapshots: int) -> None:
 
 def _linelist(string: str) -> List[str]:
     return [entry for entry in string.strip().split(' ') if entry != '']
+
+
+if __name__ == "__main__":
+
+    state_fn = 'test/test2.state'
+    t1 = time.time()
+    state = read_state(state_fn)
+    t2 = time.time()
+    print(f'read_state: {t2-t1}')
+    t1 = time.time()
+    for key in state:
+        print('########')
+        print(key) 
+    state = load_state(state_fn,savenpy=True,loadnpy=True)
+    t2 = time.time()
+    print(f'load_state (1): {t2-t1}')
+    t1 = time.time()
+    state = load_state(state_fn,savenpy=True,loadnpy=True)
+    t2 = time.time()
+    print(f'load_state (2): {t2-t1}')
+    t1 = time.time()
+    npyfiles = glob.glob('test/*.npy')
+    for fn in npyfiles:
+        os.remove(fn)
+    print('removed npy binaries')
