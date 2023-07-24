@@ -1,6 +1,6 @@
 #!/bin/env python3
 import os,sys
-from typing import List, Dict, Any
+from typing import Dict
 import numpy as np
 
 IOPOLYMC_SEQ_PATTERN_EXACT = 'exact'
@@ -8,7 +8,7 @@ IOPOLYMC_SEQ_PATTERN_EXACT = 'exact'
 ##############################################################################
 ##############################################################################
 
-def read_seq(seqfn: str) -> dict[str,str]:
+def read_seq(seqfn: str) -> Dict[str,str]:
     lines = list()
     with open(seqfn,'r') as f:
         lines = [line.strip() for line in f.readlines() if line.strip() != '']
