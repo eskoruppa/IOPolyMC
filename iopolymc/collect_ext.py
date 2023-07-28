@@ -25,7 +25,7 @@ def eval_rotation_curve(
     
     evals_path = path + '/evals'
     
-    npyfn = evals_path + ('/zext_f%.3f'%force).replace('.','p') + '.npy'
+    npyfn = evals_path + ('/rotcurve_f%.3f'%force).replace('.','p') + '.npy'
     select = {"force": force}
     nbps  = list()
     if sigmas is None:
