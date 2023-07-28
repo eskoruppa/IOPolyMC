@@ -127,14 +127,19 @@ def eval_force_extension(
     evals_path = path + '/evals'
     npyfn = evals_path + '/forceext.npy'
     
+    if select is None:
+        select = {}
+    
     if forces is None:
-        if select is None:
-            select = {}
         sims = querysims(path, select=select, recursive=recursive)
         forces = [sim['force'] for sim in sims]
-        nbps += [sim['num_bp'] for sim in sims]
     forces = sorted(list(set(forces)))
         
+    nbps  = list()
+    for force in forces:
+        select['force'] = force
+        sims = querysims(path, select=select, recursive=recursive)
+        nbps += [sim['num_bp'] for sim in sims]
     if len(list(set(nbps))) > 1:
         raise ValueError(f'Encountered different chain lengths')
     
