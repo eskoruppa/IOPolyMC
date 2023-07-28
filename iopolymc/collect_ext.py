@@ -154,7 +154,7 @@ def eval_force_extension(
             latest = _find_latest_file(allsims,fileext=fileext)
             if os.path.getmtime(npyfn) >= latest:
                 print('loading from binary')
-                data = np.load(npyfn)
+                return np.load(npyfn)        
         else:
             print('loading from binary')
             return np.load(npyfn)   
