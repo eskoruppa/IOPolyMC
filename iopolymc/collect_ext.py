@@ -1,7 +1,7 @@
 import os, sys, glob
 import numpy as np
 from typing import List, Dict, Any, Callable, Tuple
-from .scan_path import querysims
+from .input import querysims
 
 ############################################################################################
 ############################################################################################
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     
     path = sys.argv[1]
     force = float(sys.argv[2])
-    data = eval_ext(path,force)
+    data = eval_rotation_curve(path,force)
 
     z = [dat[2] for dat in data]
     v = [dat[3] for dat in data]
