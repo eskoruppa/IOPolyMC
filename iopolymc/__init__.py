@@ -44,3 +44,4 @@ from .unique_oligomers import UniqueOligomers
 
 from .collect_ext import  collect_ext, load_zext
 from .collect_ext import eval_rotation_curve
+from .collect_ext import eval_force_extension
