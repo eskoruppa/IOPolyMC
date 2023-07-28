@@ -7,7 +7,7 @@ from .scan_path import querysims
 ############################################################################################
 ############################################################################################  
 
-def eval_ext(
+def eval_rotation_curve(
     path: str,
     force: float,
     # sigmas: List[float] | np.ndarray | None = None, 
@@ -122,7 +122,6 @@ def _find_latest_file(sims: Dict[str,Any], fileext: str = '.zext'):
 def collect_ext(
     path: str,
     select: Dict[str, Any],
-    sigmas: List[float] = None,
     fileext: str = "zext",
     recursive: bool = True,
     num_files: int = None,
