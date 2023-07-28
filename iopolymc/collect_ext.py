@@ -32,7 +32,10 @@ def eval_rotation_curve(
         sims = querysims(path, select=select, recursive=recursive)
         sigmas  = [sim['sigma'] for sim in sims]
         nbps += [sim['num_bp'] for sim in sims]
-    sigmas = sorted(list(set([sim['sigma'] for sim in sims])))
+    sigmas = sorted(list(set(sigmas)))
+    
+    if len(list(set(nbps))) > 1:
+        raise ValueError(f'Encountered different chain lengths')
     
     # load from file if binary is still most recent
     if load and os.path.isfile(npyfn):
@@ -44,15 +47,18 @@ def eval_rotation_curve(
             latest = _find_latest_file(allsims,fileext=fileext)
             if os.path.getmtime(npyfn) >= latest:
                 print('loading from binary')
-                return np.load(npyfn)
+                data = np.load(npyfn)
+                if mirror:
+                    data = _mirror_data(data)
+                return data
         else:
             print('loading from binary')
-            return np.load(npyfn)   
+            data = np.load(npyfn)
+            if mirror:
+                data = _mirror_data(data)
+            return data
     
-    if len(list(set(nbps))) > 1:
-        raise ValueError(f'Encountered different chain lengths')
     L = disc_len * nbps[0]
-
     data = np.zeros([len(sigmas),5])
     for i,sigma in enumerate(sigmas):
         select['sigma'] = sigma
@@ -100,6 +106,79 @@ def _mirror_data(data: np.ndarray):
         ndata[:len(data),0] = -ndata[:len(data),0]
         ndata[:len(data),1] = -ndata[:len(data),1]
     return ndata
+
+############################################################################################
+############################################################################################
+############################################################################################ 
+
+def eval_force_extension(
+    path: str,
+    forces: List[float] = None,
+    select: Dict[str,Any] = None,
+    fileext: str = ".zext",
+    disc_len: float = 0.34,
+    recursive: bool = True,
+    num_files: int = None,
+    save: bool = True,
+    load: bool = True,
+    check_most_recent: bool = True,
+) -> np.ndarray:
+    
+    evals_path = path + '/evals'
+    npyfn = evals_path + '/forceext.npy'
+    
+    if forces is None:
+        if select is None:
+            select = {}
+        sims = querysims(path, select=select, recursive=recursive)
+        forces = [sim['force'] for sim in sims]
+        nbps += [sim['num_bp'] for sim in sims]
+    forces = sorted(list(set(forces)))
+        
+    if len(list(set(nbps))) > 1:
+        raise ValueError(f'Encountered different chain lengths')
+    
+    # load from file if binary is still most recent
+    if load and os.path.isfile(npyfn):
+        print('attempting to load')
+        if check_most_recent:
+            allsims = []
+            for force in forces:
+                select['force'] = force
+                allsims += querysims(path, select=select, recursive=recursive)
+            latest = _find_latest_file(allsims,fileext=fileext)
+            if os.path.getmtime(npyfn) >= latest:
+                print('loading from binary')
+                data = np.load(npyfn)
+        else:
+            print('loading from binary')
+            return np.load(npyfn)   
+    
+    
+    L = disc_len * nbps[0]    
+    data = np.zeros([len(forces),4])
+    for i,force in enumerate(forces):
+        select['force'] = force
+        exts = collect_ext(
+            path,
+            select,
+            fileext=fileext,
+            recursive=recursive,
+            num_files=num_files          
+        )    
+        mean      = np.mean(exts)
+        var       = np.var(exts)
+        data[i,0] = force
+        data[i,1] = mean
+        data[i,2] = var
+        data[i,3] = L
+
+    if save:
+        if not os.path.exists(evals_path):
+            os.makedirs(evals_path)
+        np.save(npyfn,data)
+    return data
+
 
 ############################################################################################
 ############################################################################################
