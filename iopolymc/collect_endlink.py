@@ -12,7 +12,7 @@ def eval_endlink(
     path: str,
     forces: List[float] = None,
     select: Dict[str,Any] = None,
-    fileext: str = ".zext",
+    fileext: str = ".endlink",
     disc_len: float = 0.34,
     recursive: bool = True,
     num_files: int = None,
@@ -88,7 +88,7 @@ def eval_endlink(
 ############################################################################################
 ############################################################################################ 
 
-def _find_latest_file(sims: Dict[str,Any], fileext: str = '.zext'):
+def _find_latest_file(sims: Dict[str,Any], fileext: str = '.endlink'):
     latest = 0
     for sim in sims:
         for fn in sim["files"]:
@@ -118,7 +118,7 @@ def collect_endlink(
         fileext = '.'+fileext
 
     # calculate topols for each simulation
-    exts = []
+    endlinks = []
     num = 0
     for sim in sims:
         if num_files is not None and num >= num_files:
@@ -127,18 +127,18 @@ def collect_endlink(
             if os.path.splitext(fn)[-1].lower() != fileext:
                 continue
             print(f'loading {fn}')
-            ext = load_endlink(fn,save_binary=save_binary,fileext=fileext)
-            exts.append(ext)
+            endlink = load_endlink(fn,save_binary=save_binary,fileext=fileext)
+            endlinks.append(endlink)
             num += 1
-    if len(exts) > 0:        
-        return np.concatenate(exts)
+    if len(endlinks) > 0:        
+        return np.concatenate(endlinks)
     return None
 
 ############################################################################################
 ############################################################################################
 ############################################################################################    
         
-def load_endlink(fn: str, save_binary: bool = True, fileext: str = '.zext') -> np.ndarray:
+def load_endlink(fn: str, save_binary: bool = True, fileext: str = '.endlink') -> np.ndarray:
     if fileext[0] != '.':
         fileext = '.'+fileext
     npyfn = fn.replace(fileext,fileext.replace('.','_'))+'.npy'
