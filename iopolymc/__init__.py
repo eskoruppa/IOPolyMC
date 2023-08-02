@@ -42,6 +42,9 @@ from .unique_oligomers import dna_oligomers
 from .unique_oligomers import complementary_sequence
 from .unique_oligomers import UniqueOligomers
 
-from .collect_ext import  collect_ext, load_zext
+from .collect_ext import collect_ext, load_zext
 from .collect_ext import eval_rotation_curve
 from .collect_ext import eval_force_extension
+
+from .collect_endlink import collect_endlink, load_endlink
+from .collect_endlink import eval_endlink
