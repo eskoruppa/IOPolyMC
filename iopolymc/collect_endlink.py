@@ -3,115 +3,12 @@ import numpy as np
 from typing import List, Dict, Any, Callable, Tuple
 from .input import querysims
 
-############################################################################################
-############################################################################################
-############################################################################################  
-
-def eval_rotation_curve(
-    path: str,
-    force: float,
-    # sigmas: List[float] | np.ndarray | None = None, 
-    sigmas: List[float] = None, 
-    fileext: str = ".zext",
-    disc_len: float = 0.34,
-    helical_repeat: float = 3.57,
-    recursive: bool = True,
-    num_files: int = None,
-    save: bool = True,
-    load: bool = True,
-    mirror: bool = True,
-    check_most_recent: bool = True,
-) -> np.ndarray:
-    
-    evals_path = path + '/evals'
-    
-    npyfn = evals_path + ('/rotcurve_f%.3f'%force).replace('.','p') + '.npy'
-    select = {"force": force}
-    nbps  = list()
-    if sigmas is None:
-        sims = querysims(path, select=select, recursive=recursive)
-        sigmas  = [sim['sigma'] for sim in sims]
-        nbps += [sim['num_bp'] for sim in sims]
-    sigmas = sorted(list(set(sigmas)))
-    
-    if len(list(set(nbps))) > 1:
-        raise ValueError(f'Encountered different chain lengths')
-    
-    # load from file if binary is still most recent
-    if load and os.path.isfile(npyfn):
-        print('attempting to load')
-        if check_most_recent:
-            allsims = []
-            for sig in sigmas:
-                allsims += querysims(path, select={'force':force,'sigma':sig}, recursive=recursive)
-            latest = _find_latest_file(allsims,fileext=fileext)
-            if os.path.getmtime(npyfn) >= latest:
-                print('loading from binary')
-                data = np.load(npyfn)
-                if mirror:
-                    data = _mirror_data(data)
-                return data
-        else:
-            print('loading from binary')
-            data = np.load(npyfn)
-            if mirror:
-                data = _mirror_data(data)
-            return data
-    
-    L = disc_len * nbps[0]
-    data = np.zeros([len(sigmas),5])
-    for i,sigma in enumerate(sigmas):
-        select['sigma'] = sigma
-        exts = collect_ext(
-            path,
-            select,
-            fileext=fileext,
-            recursive=recursive,
-            num_files=num_files          
-        )
-        dLk = L/helical_repeat*sigma
-        
-        mean      = np.mean(exts)
-        var       = np.var(exts)
-        data[i,0] = sigma
-        data[i,1] = dLk
-        data[i,2] = mean
-        data[i,3] = var
-        data[i,4] = L
-
-    if save:
-        if not os.path.exists(evals_path):
-            os.makedirs(evals_path)
-        np.save(npyfn,data)
-    if mirror:
-        data = _mirror_data(data)
-    return data
-
-############################################################################################
-############################################################################################
-############################################################################################    
-
-def _mirror_data(data: np.ndarray):
-    haszero = 0 in data[:,0]
-    if haszero:
-        ndata = np.zeros([1+2*(len(data)-1),len(data[0])])
-        ndata[(len(data)-1):]   = data
-        ndata[:(len(data)-1)]   = data[1:][::-1]
-        ndata[:(len(data)-1),0] = -ndata[:(len(data)-1),0]
-        ndata[:(len(data)-1),1] = -ndata[:(len(data)-1),1] 
-    else:
-        ndata = np.zeros([2*len(data),len(data[0])])
-        ndata[len(data):]   = data
-        ndata[:len(data)]   = data[::-1]
-        ndata[:len(data),0] = -ndata[:len(data),0]
-        ndata[:len(data),1] = -ndata[:len(data),1]
-    return ndata
 
 ############################################################################################
 ############################################################################################
 ############################################################################################ 
 
-def eval_force_extension(
+def eval_endlink(
     path: str,
     forces: List[float] = None,
     select: Dict[str,Any] = None,
@@ -125,7 +22,7 @@ def eval_force_extension(
 ) -> np.ndarray:
     
     evals_path = path + '/evals'
-    npyfn = evals_path + '/forceext.npy'
+    npyfn = evals_path + '/ceff.npy'
     
     if select is None:
         select = {}
@@ -161,22 +58,24 @@ def eval_force_extension(
     
     
     L = disc_len * nbps[0]    
-    data = np.zeros([len(forces),4])
+    data = np.zeros([len(forces),6])
     for i,force in enumerate(forces):
         select['force'] = force
-        exts = collect_ext(
+        endlink = collect_endlink(
             path,
             select,
             fileext=fileext,
             recursive=recursive,
             num_files=num_files          
-        )    
-        mean      = np.mean(exts)
-        var       = np.var(exts)
+        )
+        lk = endlink[:,0]
+        tw = endlink[:,1]
         data[i,0] = force
-        data[i,1] = mean
-        data[i,2] = var
-        data[i,3] = L
+        data[i,1] = np.mean(lk)
+        data[i,2] = np.var(lk)
+        data[i,3] = np.mean(tw)
+        data[i,4] = np.var(tw)
+        data[i,5] = L
 
     if save:
         if not os.path.exists(evals_path):
@@ -203,10 +102,10 @@ def _find_latest_file(sims: Dict[str,Any], fileext: str = '.zext'):
 ############################################################################################
 ############################################################################################  
   
-def collect_ext(
+def collect_endlink(
     path: str,
     select: Dict[str, Any],
-    fileext: str = "zext",
+    fileext: str = "endlink",
     recursive: bool = True,
     num_files: int = None,
     save_binary: bool = True
@@ -228,7 +127,7 @@ def collect_ext(
             if os.path.splitext(fn)[-1].lower() != fileext:
                 continue
             print(f'loading {fn}')
-            ext = load_zext(fn,save_binary=save_binary,fileext=fileext)
+            ext = load_endlink(fn,save_binary=save_binary,fileext=fileext)
             exts.append(ext)
             num += 1
     if len(exts) > 0:        
@@ -239,17 +138,17 @@ def collect_ext(
 ############################################################################################
 ############################################################################################    
         
-def load_zext(fn: str, save_binary: bool = True, fileext: str = '.zext') -> np.ndarray:
+def load_endlink(fn: str, save_binary: bool = True, fileext: str = '.zext') -> np.ndarray:
     if fileext[0] != '.':
         fileext = '.'+fileext
     npyfn = fn.replace(fileext,fileext.replace('.','_'))+'.npy'
     if os.path.isfile(npyfn) and os.path.getmtime(npyfn) >= os.path.getmtime(fn):
-        ext = np.load(npyfn)
+        endlink = np.load(npyfn)
     else:
-        ext = np.loadtxt(fn)
+        endlink = np.loadtxt(fn)
         if save_binary:
-            np.save(npyfn,ext)
-    return ext
+            np.save(npyfn,endlink)
+    return endlink
         
 ############################################################################################
 ############################################################################################
@@ -267,10 +166,14 @@ if __name__ == "__main__":
     
     path = sys.argv[1]
     force = float(sys.argv[2])
-    data = eval_rotation_curve(path,force)
-
-    z = [dat[2] for dat in data]
-    v = [dat[3] for dat in data]
     
-    print(f'{z}')
-    print(f'{v}')
+    # print(path)
+    # print(force)
+    # sys.exit()
+    
+    select = {'force' : force}
+    data = collect_endlink(path,select,save_binary=True)
+    
+    
+    
+    print(data.shape)
