@@ -19,6 +19,7 @@ def eval_endlink(
     save: bool = True,
     load: bool = True,
     check_most_recent: bool = True,
+    print_status: bool = True
 ) -> np.ndarray:
     
     evals_path = path + '/evals'
@@ -42,7 +43,8 @@ def eval_endlink(
     
     # load from file if binary is still most recent
     if load and os.path.isfile(npyfn):
-        print('attempting to load')
+        if print_status:
+            print('attempting to load')
         if check_most_recent:
             allsims = []
             for force in forces:
@@ -50,10 +52,12 @@ def eval_endlink(
                 allsims += querysims(path, select=select, recursive=recursive)
             latest = _find_latest_file(allsims,fileext=fileext)
             if os.path.getmtime(npyfn) >= latest:
-                print('loading from binary')
+                if print_status:
+                    print('loading from binary')
                 return np.load(npyfn)        
         else:
-            print('loading from binary')
+            if print_status:
+                print('loading from binary')
             return np.load(npyfn)   
     
     
@@ -109,7 +113,8 @@ def collect_endlink(
     fileext: str = "endlink",
     recursive: bool = True,
     num_files: int = None,
-    save_binary: bool = True
+    save_binary: bool = True,
+    print_status: bool = True
 # ) -> np.ndarray | None:
 ) -> np.ndarray:
     # querey sims
@@ -127,7 +132,8 @@ def collect_endlink(
         for fn in sim["files"]:
             if os.path.splitext(fn)[-1].lower() != fileext:
                 continue
-            print(f'loading {fn}')
+            if print_status:
+                print(f'loading {fn}')
             endlink = load_endlink(fn,save_binary=save_binary,fileext=fileext)
             endlinks.append(endlink)
             num += 1
