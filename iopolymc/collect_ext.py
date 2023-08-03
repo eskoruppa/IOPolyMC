@@ -21,10 +21,10 @@ def eval_rotation_curve(
     load: bool = True,
     mirror: bool = True,
     check_most_recent: bool = True,
+    print_status: bool = True
 ) -> np.ndarray:
     
     evals_path = path + '/evals'
-    
     npyfn = evals_path + ('/rotcurve_f%.3f'%force).replace('.','p') + '.npy'
     select = {"force": force}
     nbps  = list()
@@ -39,20 +39,23 @@ def eval_rotation_curve(
     
     # load from file if binary is still most recent
     if load and os.path.isfile(npyfn):
-        print('attempting to load')
+        if print_status:
+            print('attempting to load')
         if check_most_recent:
             allsims = []
             for sig in sigmas:
                 allsims += querysims(path, select={'force':force,'sigma':sig}, recursive=recursive)
             latest = _find_latest_file(allsims,fileext=fileext)
             if os.path.getmtime(npyfn) >= latest:
-                print('loading from binary')
+                if print_status:
+                    print('loading from binary')
                 data = np.load(npyfn)
                 if mirror:
                     data = _mirror_data(data)
                 return data
         else:
-            print('loading from binary')
+            if print_status:
+                print('loading from binary')
             data = np.load(npyfn)
             if mirror:
                 data = _mirror_data(data)
@@ -122,6 +125,7 @@ def eval_force_extension(
     save: bool = True,
     load: bool = True,
     check_most_recent: bool = True,
+    print_status: bool = True
 ) -> np.ndarray:
     
     evals_path = path + '/evals'
@@ -145,7 +149,8 @@ def eval_force_extension(
     
     # load from file if binary is still most recent
     if load and os.path.isfile(npyfn):
-        print('attempting to load')
+        if print_status:
+            print('attempting to load')
         if check_most_recent:
             allsims = []
             for force in forces:
@@ -153,12 +158,13 @@ def eval_force_extension(
                 allsims += querysims(path, select=select, recursive=recursive)
             latest = _find_latest_file(allsims,fileext=fileext)
             if os.path.getmtime(npyfn) >= latest:
-                print('loading from binary')
+                if print_status:
+                    print('loading from binary')
                 return np.load(npyfn)        
         else:
-            print('loading from binary')
+            if print_status:
+                print('loading from binary')
             return np.load(npyfn)   
-    
     
     L = disc_len * nbps[0]    
     data = np.zeros([len(forces),4])
