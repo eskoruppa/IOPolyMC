@@ -62,7 +62,7 @@ def eval_endlink(
     
     
     L = disc_len * nbps[0]    
-    data = np.zeros([len(forces),7])
+    data = np.zeros([len(forces),9])
     for i,force in enumerate(forces):
         select['force'] = force
         endlink = collect_endlink(
@@ -81,6 +81,9 @@ def eval_endlink(
         data[i,4] = np.var(tw)
         data[i,5] = L
         data[i,6] = L / (4*np.pi**2*data[i,2])
+        data[i,7] = L / (4*np.pi**2*data[i,4])
+        data[i,8] = L / (4*np.pi**2*np.var(lk-tw))
+
 
     if save:
         if not os.path.exists(evals_path):
