@@ -51,14 +51,14 @@ def eval_rotation_curve(
                     print('loading from binary')
                 data = np.load(npyfn)
                 if mirror:
-                    data = _mirror_data(data)
+                    data = mirror_rotcurve_data(data)
                 return data
         else:
             if print_status:
                 print('loading from binary')
             data = np.load(npyfn)
             if mirror:
-                data = _mirror_data(data)
+                data = mirror_rotcurve_data(data)
             return data
     
     L = disc_len * nbps[0]
@@ -87,14 +87,14 @@ def eval_rotation_curve(
             os.makedirs(evals_path)
         np.save(npyfn,data)
     if mirror:
-        data = _mirror_data(data)
+        data = mirror_rotcurve_data(data)
     return data
 
 ############################################################################################
 ############################################################################################
 ############################################################################################    
 
-def _mirror_data(data: np.ndarray):
+def mirror_rotcurve_data(data: np.ndarray):
     haszero = 0 in data[:,0]
     if haszero:
         ndata = np.zeros([1+2*(len(data)-1),len(data[0])])
