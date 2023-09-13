@@ -14,6 +14,6 @@ setup(name='iopolymc',
       include_package_data=True,
       package_data={'': ['database/*']},
       install_requires=[
-          'numpy<=1.22',
+          'numpy>=1.20',
       ],
       zip_safe=False) 
