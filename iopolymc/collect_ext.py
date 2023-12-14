@@ -94,7 +94,7 @@ def eval_rotation_curve(
 ############################################################################################
 ############################################################################################    
 
-def mirror_rotcurve_data(data: np.ndarray):
+def mirror_rotcurve_data(data: np.ndarray) -> np.ndarray:
     haszero = 0 in data[:,0]
     if haszero:
         ndata = np.zeros([1+2*(len(data)-1),len(data[0])])

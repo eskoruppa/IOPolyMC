@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 import os,sys
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 import numpy as np
 
 """
@@ -44,26 +44,74 @@ def load_pos_of_type(filename: str, selected_types: List[str], savenpy: bool=Tru
 def _linelist(line: str) -> List[str]:
     return [elem for elem in line.strip().split(' ') if elem != '']
 
+# def read_xyz(filename: str) -> Dict[str,Any]:
+#     print(f"reading '{filename}'")
+#     data = list()
+#     with open(filename) as f:
+#         line = f.readline()
+#         while line!='':
+#             ll = _linelist(line)
+#             if len(ll)>=4 and ll[0]!='Atoms.':
+#                 snapshot = list()
+#                 while len(ll)>=4:
+#                     snapshot.append( [float(ft) for ft in ll[1:4]] )
+#                     print(snapshot[-1])
+#                     line = f.readline()
+#                     ll   = _linelist(line)
+#                 data.append(snapshot)
+#             line = f.readline()
+#     data = np.array(data)
+#     xyz = dict()
+#     xyz['pos']   = data
+#     xyz['types'] = read_xyz_atomtypes(filename)
+#     return xyz
+
 def read_xyz(filename: str) -> Dict[str,Any]:
     print(f"reading '{filename}'")
-    data = list()
+    dims = find_xyz_dimensions(filename)
+    print(f'{dims[0]} snapshots with {dims[1]} monomers.')
+    data = np.empty((dims)+(3,))
     with open(filename) as f:
         line = f.readline()
+        snap=-1
         while line!='':
             ll = _linelist(line)
             if len(ll)>=4 and ll[0]!='Atoms.':
-                snapshot = list()
+                snap+=1
+                if snap%1000==0:
+                    print(f'{snap=}')
+                bp=0
                 while len(ll)>=4:
-                    snapshot.append( [float(ft) for ft in ll[1:4]])
+                    data[snap,bp] = [float(ft) for ft in ll[1:4]]
+                    bp+=1
                     line = f.readline()
                     ll   = _linelist(line)
-                data.append(snapshot)
             line = f.readline()
-    data = np.array(data)
     xyz = dict()
-    xyz['pos']   = data
+    xyz['pos']   = data 
     xyz['types'] = read_xyz_atomtypes(filename)
     return xyz
+
+def find_xyz_dimensions(filename: str) -> Tuple:
+    rec = 'Atoms.'
+    lrec = len(rec)
+    with open(filename) as f:
+        line = f.readline().replace('\n','')
+        ll = _linelist(line)
+        while len(ll)<4 or line[:lrec]==rec:
+            line = f.readline().replace('\n','')
+            ll = _linelist(line)        
+        nbp = 0
+        while len(ll)>=4 and line[:lrec]!=rec:
+            nbp += 1
+            line = f.readline()
+            ll = _linelist(line)
+    with open(filename) as f:
+        num_snap = 0
+        for line in f:
+            if rec == line[:lrec]:
+                num_snap += 1
+    return (num_snap,nbp)
     
 def read_xyz_atomtypes(filename: str) -> List:
     data = list()
