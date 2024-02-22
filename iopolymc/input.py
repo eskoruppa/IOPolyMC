@@ -1,7 +1,10 @@
-import numpy as np
-import sys, os
 import glob
-from typing import List, Dict, Any
+import os
+import sys
+from typing import Any, Dict, List
+
+import numpy as np
+
 from .simplest_type import simplest_type
 
 """
@@ -121,11 +124,11 @@ def _init_querysims(path: str, recursive=False, extension="in") -> List[dict]:
         sims.append(siminput)
     return sims
 
+
 def simfiles(infile: str, extension="in") -> List[str]:
     basefn = infile.replace("." + extension, "")
     allfns = glob.glob(basefn + ".*")
     return allfns
-
 
 
 ########################################################
