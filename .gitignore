@@ -21,3 +21,4 @@ iopolymc.egg-info/
 
 # ignore all test files
 **test.py
+test*

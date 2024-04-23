@@ -21,7 +21,7 @@ from .pts2config import config2triads, pts2config, pts2restart, pts2xyz
 from .restart import read_restart, write_restart
 from .scan_path import scan_path
 from .seq import read_seq, write_seq
-from .state import load_state, read_spec, read_state
+from .state import load_state, read_spec, read_state, isstate
 from .thetas import load_thetas, read_thetas
 from .unique_oligomers import UniqueOligomers, complementary_sequence, dna_oligomers
-from .xyz import load_xyz, read_xyz, read_xyz_atomtypes, write_xyz
+from .xyz import load_xyz, read_xyz, read_xyz_atomtypes, write_xyz, isxyz

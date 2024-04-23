@@ -7,6 +7,10 @@ import numpy as np
 
 from .simplest_type import simplest_type
 
+def isstate(fn: str) -> bool:
+    if os.path.splitext(fn)[-1].lower() == '.state':
+        return True
+    return False
 
 def load_state(
     filename: str, savenpy: bool = True, loadnpy: bool = True

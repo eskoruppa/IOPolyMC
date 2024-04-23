@@ -93,8 +93,8 @@ def read_xyz(filename: str) -> Dict[str, Any]:
             ll = _linelist(line)
             if len(ll) >= 4 and ll[0] != "Atoms.":
                 snap += 1
-                if snap % 1000 == 0:
-                    print(f"{snap=}")
+                # if snap % 1000 == 0:
+                #     print(f"{snap=}")
                 bp = 0
                 while len(ll) >= 4:
                     data[snap, bp] = [float(ft) for ft in ll[1:4]]
@@ -198,6 +198,11 @@ def _save_xyz_binary(outname: str, data: np.ndarray) -> None:
     else:
         outn = outname + ".npy"
     np.save(outn, data)
+    
+def isxyz(fn: str) -> bool:
+    if os.path.splitext(fn)[-1].lower() == '.xyz':
+        return True
+    return False
 
 
 if __name__ == "__main__":
