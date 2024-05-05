@@ -13,7 +13,7 @@ BPDICTS_FN = "database/bpdicts"
 ###########################################################################################################################
 
 
-def _load_bpdicts(fn: str) -> Dict[str, Any]:
+def _load_bpdicts(fn: str = None) -> Dict[str, Any]:
     """
     Parameters:
     fn : str
@@ -22,6 +22,8 @@ def _load_bpdicts(fn: str) -> Dict[str, Any]:
     Returns:
     dict - containing residue data
     """
+    if fn is None:
+        fn = pkg_resources.resource_filename(__name__, BPDICTS_FN)
     with open(fn, "r") as f:
         bpdicts = json.load(f)
     return bpdicts
@@ -168,7 +170,7 @@ def gen_pdb(
     outfn: str,
     positions: np.ndarray,
     triads: np.ndarray,
-    bpdicts: Dict[str, Any],
+    bpdicts: Dict[str, Any] = None,
     sequence: str = None,
     center: bool = True,
 ):
@@ -184,9 +186,12 @@ def gen_pdb(
         raise ValueError(
             f"Wrong dimension provided for triads. Input needs to be a single configuration."
         )
+    
+    if bpdicts is None:
+        bpdicts = _load_bpdicts()
 
     numbp = len(positions)
-
+    
     # check if the discretization length is correct
     # this may be replaced in the future by allowing all discretization lengths
     disc_len = _discretization_length(positions)
@@ -295,8 +300,6 @@ def state2pdb(
     """
 
     # load base pair database
-    if bpdicts_fn is None:
-        bpdicts_fn = pkg_resources.resource_filename(__name__, BPDICTS_FN)
     bpdicts = _load_bpdicts(bpdicts_fn)
 
     # load state
