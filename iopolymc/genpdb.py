@@ -189,6 +189,7 @@ def gen_pdb(
     
     if bpdicts is None:
         bpdicts = _load_bpdicts()
+    sequence = sequence.upper()
 
     numbp = len(positions)
     
