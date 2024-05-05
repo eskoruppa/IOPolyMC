@@ -233,7 +233,7 @@ def gen_pdb(
                 atom_name = atom["name"]
                 atom_pos = atom["pos"]
                 # atom_pos = np.dot(atom_pos,triad) + pos
-                atom_pos = np.dot(triad.T, atom_pos) + pos
+                atom_pos = np.dot(triad, atom_pos) + pos
                 pdbline = _build_pdb_atomline(
                     atomID, atom_name, residue_name, strandID, residueID, atom_pos
                 )
@@ -259,7 +259,7 @@ def gen_pdb(
                 atom_name = atom["name"]
                 atom_pos = atom["pos"]
                 # atom_pos = np.dot( atom_pos,triad) + pos
-                atom_pos = np.dot(triad.T, atom_pos) + pos
+                atom_pos = np.dot(triad, atom_pos) + pos
                 pdbline = _build_pdb_atomline(
                     atomID, atom_name, residue_name, strandID, residueID, atom_pos
                 )
@@ -315,6 +315,7 @@ def state2pdb(
 
     pos = conf[snapshot]
     triads = triads[snapshot]
+    triads = triads.swapaxes(1,2)
     gen_pdb(outfn, pos, triads, bpdicts, sequence=sequence)
 
 
