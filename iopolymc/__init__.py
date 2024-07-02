@@ -16,7 +16,8 @@ from .collect_ext import (
 )
 from .genpdb import gen_pdb, state2pdb
 from .idb import read_idb, write_idb
-from .input import querysims, read_input, simfiles, write_input
+from .input import read_input, write_input
+from .query_sims import querysims, simfiles
 from .pts2config import config2triads, pts2config, pts2restart, pts2xyz
 from .restart import read_restart, write_restart
 from .scan_path import scan_path

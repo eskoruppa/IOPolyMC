@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import numpy as np
 
-from .input import querysims
+from .query_sims import querysims
 
 ############################################################################################
 ############################################################################################
