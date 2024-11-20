@@ -1,3 +1,4 @@
+from __future__ import annotations
 import glob
 import os
 import sys
@@ -15,8 +16,8 @@ from .query_sims import querysims
 def eval_rotation_curve(
     path: str,
     force: float,
-    # sigmas: List[float] | np.ndarray | None = None,
-    sigmas: List[float] = None,
+    sigmas: List[float] | np.ndarray | None = None,
+    # sigmas: List[float] = None,
     fileext: str = ".zext",
     disc_len: float = 0.34,
     helical_repeat: float = 3.57,
@@ -38,8 +39,10 @@ def eval_rotation_curve(
         nbps += [sim["num_bp"] for sim in sims]
     sigmas = sorted(list(set(sigmas)))
 
+    fixed_length = True
     if len(list(set(nbps))) > 1:
-        raise ValueError(f"Encountered different chain lengths")
+        fixed_length = False
+        # raise ValueError(f"Encountered different chain lengths")
 
     # load from file if binary is still most recent
     if load and os.path.isfile(npyfn):
@@ -67,7 +70,6 @@ def eval_rotation_curve(
                 data = mirror_rotcurve_data(data)
             return data
 
-    L = disc_len * nbps[0]
     data = np.zeros([len(sigmas), 5])
     for i, sigma in enumerate(sigmas):
         select["sigma"] = sigma
@@ -75,6 +77,12 @@ def eval_rotation_curve(
             path, select, fileext=fileext, recursive=recursive, num_files=num_files
         )
         dLk = L / helical_repeat * sigma
+
+        if fixed_length:
+            L = disc_len * nbps[0]
+        else:
+            fsims = querysims(path, select=select, recursive=recursive)
+            L = disc_len * np.mean([sim["num_bp"] for sim in fsims])
 
         mean = np.mean(exts)
         var = np.var(exts)
@@ -149,8 +157,11 @@ def eval_force_extension(
         select["force"] = force
         sims = querysims(path, select=select, recursive=recursive)
         nbps += [sim["num_bp"] for sim in sims]
+        
+    fixed_length = True
     if len(list(set(nbps))) > 1:
-        raise ValueError(f"Encountered different chain lengths")
+        fixed_length = False
+        # raise ValueError(f"Encountered different chain lengths")
 
     # load from file if binary is still most recent
     if load and os.path.isfile(npyfn):
@@ -171,19 +182,54 @@ def eval_force_extension(
                 print("loading from binary")
             return np.load(npyfn)
 
-    L = disc_len * nbps[0]
-    data = np.zeros([len(forces), 4])
-    for i, force in enumerate(forces):
-        select["force"] = force
-        exts = collect_ext(
-            path, select, fileext=fileext, recursive=recursive, num_files=num_files
-        )
-        mean = np.mean(exts)
-        var = np.var(exts)
-        data[i, 0] = force
-        data[i, 1] = mean
-        data[i, 2] = var
-        data[i, 3] = L
+    # check dimension of files:
+    select["force"] = forces[0]
+    exts = collect_ext(
+        path, select, fileext=fileext, recursive=recursive, num_files=1
+    )
+    if len(exts.shape) == 1:
+        data = np.zeros([len(forces), 4])
+        for i, force in enumerate(forces):
+            select["force"] = force
+            exts = collect_ext(
+                path, select, fileext=fileext, recursive=recursive, num_files=num_files
+            )
+            if fixed_length:
+                L = disc_len * nbps[0]
+            else:
+                fsims = querysims(path, select=select, recursive=recursive)
+                L = disc_len * np.mean([sim["num_bp"] for sim in fsims])
+            
+            mean = np.mean(exts)
+            var = np.var(exts)
+            data[i, 0] = force
+            data[i, 1] = mean
+            data[i, 2] = var
+            data[i, 3] = L
+    else:
+        subs = exts.shape[1]
+        data = np.zeros([subs,len(forces), 4])
+        for i, force in enumerate(forces):
+            select["force"] = force
+            exts = collect_ext(
+                path, select, fileext=fileext, recursive=recursive, num_files=num_files
+            )
+            if fixed_length:
+                L = disc_len * nbps[0]
+            else:
+                fsims = querysims(path, select=select, recursive=recursive)
+                L = disc_len * np.mean([sim["num_bp"] for sim in fsims])
+            
+            if exts.shape[1] != subs:
+                raise ValueError('Inconsistent number of entries')
+            
+            for j in range(subs):
+                mean = np.mean(exts[:,j])
+                var = np.var(exts[:,j])
+                data[j, i, 0] = force
+                data[j, i, 1] = mean
+                data[j, i, 2] = var
+                data[j, i, 3] = L
 
     if save:
         if not os.path.exists(evals_path):
@@ -220,8 +266,8 @@ def collect_ext(
     recursive: bool = True,
     num_files: int = None,
     save_binary: bool = True
-    # ) -> np.ndarray | None:
-) -> np.ndarray:
+    ) -> np.ndarray | None:
+# ) -> np.ndarray:
     # querey sims
     sims = querysims(path, select=select, recursive=recursive)
 
