@@ -173,6 +173,7 @@ def gen_pdb(
     bpdicts: Dict[str, Any] = None,
     sequence: str = None,
     center: bool = True,
+    ignore_errors: bool = False,
 ):
     """
     positions needs to be in nm!
@@ -196,11 +197,12 @@ def gen_pdb(
     # check if the discretization length is correct
     # this may be replaced in the future by allowing all discretization lengths
     disc_len = _discretization_length(positions)
-    if np.abs(disc_len - 0.34) / 0.34 > 0.1:
+    if np.abs(disc_len - 0.34) / 0.34 > 0.5:
         # wrong discretization length
-        raise ValueError(
-            f"Discretization length needs to be 0.34 nm. Provided configuration has discretization length {disc_len} nm!"
-        )
+        if not ignore_errors:
+            raise ValueError(
+                f"Discretization length needs to be close to 0.34 nm. Provided configuration has discretization length {disc_len} nm!"
+            )
 
     if sequence is None:
         sequence = _random_sequenceuence(numbp)
