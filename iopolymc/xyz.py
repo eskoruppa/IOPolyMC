@@ -57,41 +57,20 @@ def load_pos_of_type(
 def _linelist(line: str) -> List[str]:
     return [elem for elem in line.strip().split(" ") if elem != ""]
 
-
-# def read_xyz(filename: str) -> Dict[str,Any]:
-#     print(f"reading '{filename}'")
-#     data = list()
-#     with open(filename) as f:
-#         line = f.readline()
-#         while line!='':
-#             ll = _linelist(line)
-#             if len(ll)>=4 and ll[0]!='Atoms.':
-#                 snapshot = list()
-#                 while len(ll)>=4:
-#                     snapshot.append( [float(ft) for ft in ll[1:4]] )
-#                     print(snapshot[-1])
-#                     line = f.readline()
-#                     ll   = _linelist(line)
-#                 data.append(snapshot)
-#             line = f.readline()
-#     data = np.array(data)
-#     xyz = dict()
-#     xyz['pos']   = data
-#     xyz['types'] = read_xyz_atomtypes(filename)
-#     return xyz
-
-
 def read_xyz(filename: str) -> Dict[str, Any]:
     print(f"reading '{filename}'")
     dims = find_xyz_dimensions(filename)
     print(f"{dims[0]} snapshots with {dims[1]} monomers.")
     data = np.empty((dims) + (3,))
     with open(filename) as f:
-        line = f.readline()
+        line = f.readline().rstrip()
+        # define rec
+        rec = str(line)
+        ####
         snap = -1
         while line != "":
             ll = _linelist(line)
-            if len(ll) >= 4 and ll[0] != "Atoms.":
+            if line != rec and len(ll) >= 4: # and ll[0] != "Atoms.":
                 snap += 1
                 bp = 0
                 while len(ll) >= 4:
@@ -107,13 +86,17 @@ def read_xyz(filename: str) -> Dict[str, Any]:
 
 
 def find_xyz_dimensions(filename: str) -> Tuple:
-    rec = "Atoms."
-    lrec = len(rec)
+    # rec = "Atoms."
+    # lrec = len(rec)
     with open(filename) as f:
-        line = f.readline().replace("\n", "")
+        line = f.readline().rstrip()
+        # define rec
+        rec = str(line)
+        lrec = len(rec)
+        ####
         ll = _linelist(line)
         while len(ll) < 4 or line[:lrec] == rec:
-            line = f.readline().replace("\n", "")
+            line = f.readline().rstrip()
             ll = _linelist(line)
         nbp = 0
         while len(ll) >= 4 and line[:lrec] != rec:
