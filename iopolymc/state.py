@@ -45,7 +45,6 @@ def load_state(
             all_found = False
 
     if loadnpy and all_found:
-        print("quickload")
         if state["pos_contained"]:
             print(f"loading positions from '{pos_fnpy}'")
             state["pos"] = np.load(pos_fnpy)
@@ -131,13 +130,13 @@ def read_state(fn: str) -> Dict[str, Any]:
                     line = f.readline()
                     ll = _linelist(line)
                     triads[i, 0, 0] = float(ll[0])
-                    triads[i, 0, 1] = float(ll[1])
-                    triads[i, 0, 2] = float(ll[2])
-                    triads[i, 1, 0] = float(ll[3])
+                    triads[i, 1, 0] = float(ll[1])
+                    triads[i, 2, 0] = float(ll[2])
+                    triads[i, 0, 1] = float(ll[3])
                     triads[i, 1, 1] = float(ll[4])
-                    triads[i, 1, 2] = float(ll[5])
-                    triads[i, 2, 0] = float(ll[6])
-                    triads[i, 2, 1] = float(ll[7])
+                    triads[i, 2, 1] = float(ll[5])
+                    triads[i, 0, 2] = float(ll[6])
+                    triads[i, 1, 2] = float(ll[7])
                     triads[i, 2, 2] = float(ll[8])
                 all_triads.append(triads)
             # read Angles
