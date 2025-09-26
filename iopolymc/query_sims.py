@@ -80,7 +80,7 @@ def _init_querysims(path: str, recursive=False, extension="in") -> List[dict]:
 
 def simfiles(infile: str, extension="in") -> List[str]:
     basefn = infile.replace("." + extension, "")
-    allfns = glob.glob(basefn + ".*")
+    allfns = glob.glob(basefn + "*")
     return allfns
 
 ########################################################
