@@ -1,10 +1,10 @@
+from __future__ import annotations
+
 import glob
 import os
 import time
-from typing import Any, Dict, List
-
+from typing import Any
 import numpy as np
-
 from .simplest_type import simplest_type
 
 def isstate(fn: str) -> bool:
@@ -13,8 +13,10 @@ def isstate(fn: str) -> bool:
     return False
 
 def load_state(
-    filename: str, savenpy: bool = True, loadnpy: bool = True
-) -> Dict[str, Any]:
+    filename: str, 
+    savenpy: bool = True, 
+    loadnpy: bool = True
+) -> dict[str, Any]:
     """
     Loads data in state-file and saves positions, triads and Omegas as
     numpy binaries. Data is loaded from binary if binary already exists.
@@ -66,7 +68,7 @@ def load_state(
     return state
 
 
-def read_spec(fn: str) -> Dict[str, Any]:
+def read_spec(fn: str) -> dict[str, Any]:
     specs = dict()
     specs["pos_contained"] = False
     specs["triads_contained"] = False
@@ -96,7 +98,7 @@ def read_spec(fn: str) -> Dict[str, Any]:
     return specs
 
 
-def read_state(fn: str) -> Dict[str, Any]:
+def read_state(fn: str) -> dict[str, Any]:
     """
     Reads state-file.
     """
@@ -165,7 +167,7 @@ def _save_npy(outname: str, snapshots: int) -> None:
     np.save(outname, snapshots)
 
 
-def _linelist(string: str) -> List[str]:
+def _linelist(string: str) -> list[str]:
     return [entry for entry in string.strip().split(" ") if entry != ""]
 
 

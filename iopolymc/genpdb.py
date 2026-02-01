@@ -1,9 +1,11 @@
-import json
-import sys
-from typing import Any, Dict, List
+from __future__ import annotations
 
+import json
+import os
+import sys
+from typing import Any #, Dict, List
 import numpy as np
-import pkg_resources
+# import pkg_resources
 
 from .state import read_state
 
@@ -13,7 +15,7 @@ BPDICTS_FN = "database/bpdicts"
 ###########################################################################################################################
 
 
-def _load_bpdicts(fn: str = None) -> Dict[str, Any]:
+def _load_bpdicts(fn: str | None = None) -> dict[str, Any]:
     """
     Parameters:
     fn : str
@@ -23,7 +25,9 @@ def _load_bpdicts(fn: str = None) -> Dict[str, Any]:
     dict - containing residue data
     """
     if fn is None:
-        fn = pkg_resources.resource_filename(__name__, BPDICTS_FN)
+        # fn = pkg_resources.resource_filename(__name__, BPDICTS_FN)
+        pkg_dir = os.path.dirname(__file__)
+        fn = os.path.normpath(os.path.join(pkg_dir, BPDICTS_FN))
     with open(fn, "r") as f:
         bpdicts = json.load(f)
     return bpdicts
@@ -58,7 +62,7 @@ def _build_pdb_atomline(
     residue_name: str,
     strandID: str,
     residueID: int,
-    atom_pos: List[float],
+    atom_pos: list[float],
 ) -> str:
     """
     generates pdb line for atom
@@ -143,7 +147,7 @@ def _rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
 ###########################################################################################################################
 
 
-def _random_sequenceuence(N: int) -> List[str]:
+def _random_sequenceuence(N: int) -> list[str]:
     """
     generates random base sequence of length N
     """
@@ -170,7 +174,7 @@ def gen_pdb(
     outfn: str,
     positions: np.ndarray,
     triads: np.ndarray,
-    bpdicts: Dict[str, Any] = None,
+    bpdicts: dict[str, Any] = None,
     sequence: str = None,
     center: bool = True,
     ignore_errors: bool = False,
@@ -318,7 +322,7 @@ def state2pdb(
     pos = conf[snapshot]
     triads = triads[snapshot]
     triads = triads.swapaxes(1,2)
-    gen_pdb(outfn, pos, triads, bpdicts, sequence=sequence)
+    gen_pdb(outfn, pos, triads, bpdicts, sequence=sequence, center=center)
 
 
 ###########################################################################################################################

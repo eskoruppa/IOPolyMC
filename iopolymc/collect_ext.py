@@ -1,9 +1,8 @@
 from __future__ import annotations
-import glob
+
 import os
 import sys
-from typing import Any, Callable, Dict, List, Tuple
-
+from typing import Any # Dict, List
 import numpy as np
 
 from .query_sims import querysims
@@ -16,7 +15,7 @@ from .query_sims import querysims
 def eval_rotation_curve(
     path: str,
     force: float,
-    sigmas: List[float] | np.ndarray | None = None,
+    sigmas: list[float] | np.ndarray | None = None,
     # sigmas: List[float] = None,
     fileext: str = ".zext",
     disc_len: float = 0.34,
@@ -130,8 +129,8 @@ def mirror_rotcurve_data(data: np.ndarray) -> np.ndarray:
 
 def eval_force_extension(
     path: str,
-    forces: List[float] = None,
-    select: Dict[str, Any] = None,
+    forces: list[float] = None,
+    select: dict[str, Any] = None,
     fileext: str = ".zext",
     disc_len: float = 0.34,
     recursive: bool = True,
@@ -243,7 +242,7 @@ def eval_force_extension(
 ############################################################################################
 
 
-def _find_latest_file(sims: Dict[str, Any], fileext: str = ".zext"):
+def _find_latest_file(sims: dict[str, Any], fileext: str = ".zext"):
     latest = 0
     for sim in sims:
         for fn in sim["files"]:
@@ -261,7 +260,7 @@ def _find_latest_file(sims: Dict[str, Any], fileext: str = ".zext"):
 
 def collect_ext(
     path: str,
-    select: Dict[str, Any],
+    select: dict[str, Any],
     fileext: str = "zext",
     recursive: bool = True,
     num_files: int = None,

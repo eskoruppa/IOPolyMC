@@ -2,8 +2,7 @@
 
 import os
 import sys
-from typing import Any, Dict, List, Tuple
-
+from typing import Any
 import numpy as np
 
 """
@@ -25,7 +24,7 @@ XYZ_NPY_EXT = "_xyz.npy"
 
 def load_xyz(
     filename: str, savenpy: bool = True, loadnpy: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     if not os.path.isfile(filename):
         raise FileNotFoundError(f"No such file or directory: '{filename}'")
     fnpy = os.path.splitext(filename)[0] + XYZ_NPY_EXT
@@ -46,7 +45,7 @@ def load_xyz(
 
 
 def load_pos_of_type(
-    filename: str, selected_types: List[str], savenpy: bool = True, loadnpy: bool = True
+    filename: str, selected_types: list[str], savenpy: bool = True, loadnpy: bool = True
 ) -> np.ndarray:
     xyz = load_xyz(filename, savenpy=savenpy, loadnpy=savenpy)
     ids = [id for id in range(len(xyz["types"])) if xyz["types"][id] in selected_types]
@@ -54,10 +53,10 @@ def load_pos_of_type(
     return data
 
 
-def _linelist(line: str) -> List[str]:
+def _linelist(line: str) -> list[str]:
     return [elem for elem in line.strip().split(" ") if elem != ""]
 
-def read_xyz(filename: str) -> Dict[str, Any]:
+def read_xyz(filename: str) -> dict[str, Any]:
     print(f"reading '{filename}'")
     dims = find_xyz_dimensions(filename)
     print(f"{dims[0]} snapshots with {dims[1]} monomers.")
@@ -85,7 +84,7 @@ def read_xyz(filename: str) -> Dict[str, Any]:
     return xyz
 
 
-def find_xyz_dimensions(filename: str) -> Tuple:
+def find_xyz_dimensions(filename: str) -> tuple:
     # rec = "Atoms."
     # lrec = len(rec)
     with open(filename) as f:
@@ -111,7 +110,7 @@ def find_xyz_dimensions(filename: str) -> Tuple:
     return (num_snap, nbp)
 
 
-def read_xyz_atomtypes(filename: str) -> List:
+def read_xyz_atomtypes(filename: str) -> list:
     data = list()
     with open(filename) as f:
         line = f.readline()
