@@ -147,7 +147,7 @@ def _rotate_z(triad: np.ndarray, phi: float) -> np.ndarray:
 ###########################################################################################################################
 
 
-def _random_sequenceuence(N: int) -> list[str]:
+def _random_sequence(N: int) -> list[str]:
     """
     generates random base sequence of length N
     """
@@ -209,7 +209,7 @@ def gen_pdb(
             )
 
     if sequence is None:
-        sequence = _random_sequenceuence(numbp)
+        sequence = _random_sequence(numbp)
 
     if center:
         positions -= np.mean(positions, axis=0)
