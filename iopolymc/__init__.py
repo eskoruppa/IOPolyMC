@@ -14,7 +14,7 @@ from .collect_ext import (
     load_zext,
     mirror_rotcurve_data,
 )
-from .genpdb import gen_pdb, state2pdb
+from .genpdb import gen_pdb, state2pdb, gen_cif
 from .idb import read_idb, write_idb
 from .input import read_input, write_input
 from .query_sims import querysims, simfiles

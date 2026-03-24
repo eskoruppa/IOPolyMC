@@ -329,6 +329,102 @@ def state2pdb(
 ###########################################################################################################################
 ###########################################################################################################################
 
+def gen_cif(
+    outfn: str,
+    positions: np.ndarray,
+    triads: np.ndarray,
+    bpdicts: dict[str, Any] = None,
+    sequence: str = None,
+    center: bool = True,
+    ignore_errors: bool = False,
+):
+    """
+    Writes structure as mmCIF. positions needs to be in nm.
+    """
+    if len(positions.shape) > 2:
+        raise ValueError("Wrong dimension for positions. Input needs to be a single configuration.")
+    if len(triads.shape) > 3:
+        raise ValueError("Wrong dimension for triads. Input needs to be a single configuration.")
+
+    if bpdicts is None:
+        bpdicts = _load_bpdicts()
+    sequence = sequence.upper()
+
+    numbp = len(positions)
+
+    disc_len = _discretization_length(positions)
+    if np.abs(disc_len - 0.34) / 0.34 > 0.5:
+        if not ignore_errors:
+            raise ValueError(
+                f"Discretization length needs to be close to 0.34 nm. Got {disc_len} nm."
+            )
+
+    if sequence is None:
+        sequence = _random_sequence(numbp)
+
+    if center:
+        positions -= np.mean(positions, axis=0)
+
+    positions = 10 * np.array(positions)  # nm -> Angstrom
+
+    with open(outfn, "w") as f:
+        # mmCIF header
+        f.write("data_DNA\n#\n")
+        f.write("loop_\n")
+        f.write("_atom_site.group_PDB\n")
+        f.write("_atom_site.id\n")
+        f.write("_atom_site.label_atom_id\n")
+        f.write("_atom_site.label_comp_id\n")
+        f.write("_atom_site.label_asym_id\n")
+        f.write("_atom_site.label_seq_id\n")
+        f.write("_atom_site.Cartn_x\n")
+        f.write("_atom_site.Cartn_y\n")
+        f.write("_atom_site.Cartn_z\n")
+
+        atomID = 0
+        residueID = 0
+
+        # STRAND A
+        for i in range(numbp):
+            residueID += 1
+            basetype = sequence[i]
+            triad = triads[i]
+            pos = positions[i]
+            residue = bpdicts[basetype]["resA"]
+            residue_name = residue["resname"]
+            for atom in residue["atoms"]:
+                atomID += 1
+                atom_pos = np.dot(triad, atom["pos"]) + pos
+                f.write(
+                    f"ATOM {atomID} {atom['name']} {residue_name} A {residueID} "
+                    f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
+                )
+
+        # STRAND B
+        for i in range(numbp - 1, -1, -1):
+            residueID += 1
+            basetype = sequence[i]
+            triad = triads[i]
+            pos = positions[i]
+            residue = bpdicts[basetype]["resB"]
+            residue_name = residue["resname"]
+            for atom in residue["atoms"]:
+                atomID += 1
+                atom_pos = np.dot(triad, atom["pos"]) + pos
+                f.write(
+                    f"ATOM {atomID} {atom['name']} {residue_name} B {residueID} "
+                    f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
+                )
+
+        f.write("#\n")
+
+
+###########################################################################################################################
+###########################################################################################################################
+###########################################################################################################################
+
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         print("usage: python %s fin fout snapshot" % sys.argv[0])
