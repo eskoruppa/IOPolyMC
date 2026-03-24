@@ -375,9 +375,54 @@ def gen_cif(
 
     positions = 10 * np.array(positions)  # nm -> Angstrom
 
+    # Precompute residue names for both strands (needed for sequence metadata)
+    resnames_A = [bpdicts[sequence[i]]["resA"]["resname"] for i in range(numbp)]
+    resnames_B = [bpdicts[sequence[i]]["resB"]["resname"] for i in range(numbp - 1, -1, -1)]
+
     with open(outfn, "w") as f:
-        # mmCIF header
+
+        # --- Entity definitions ---
         f.write("data_DNA\n#\n")
+        f.write("loop_\n")
+        f.write("_entity.id\n")
+        f.write("_entity.type\n")
+        f.write("_entity.pdbx_description\n")
+        f.write("1 polymer 'DNA strand A'\n")
+        f.write("2 polymer 'DNA strand B'\n")
+        f.write("#\n")
+
+        # --- Polymer type ---
+        f.write("loop_\n")
+        f.write("_entity_poly.entity_id\n")
+        f.write("_entity_poly.type\n")
+        f.write("_entity_poly.pdbx_seq_one_letter_code\n")
+        f.write(f"1 polydeoxyribonucleotide {''.join(sequence)}\n")
+        # Strand B is reverse complement, written 3'->5'
+        complement = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
+        seq_B = ''.join(complement.get(b, 'N') for b in reversed(sequence))
+        f.write(f"2 polydeoxyribonucleotide {seq_B}\n")
+        f.write("#\n")
+
+        # --- Chain to entity mapping ---
+        f.write("loop_\n")
+        f.write("_struct_asym.id\n")
+        f.write("_struct_asym.entity_id\n")
+        f.write("A 1\n")
+        f.write("B 2\n")
+        f.write("#\n")
+
+        # --- Sequence residues for strand A ---
+        f.write("loop_\n")
+        f.write("_entity_poly_seq.entity_id\n")
+        f.write("_entity_poly_seq.num\n")
+        f.write("_entity_poly_seq.mon_id\n")
+        for i, resname in enumerate(resnames_A):
+            f.write(f"1 {i+1} {resname}\n")
+        for i, resname in enumerate(resnames_B):
+            f.write(f"2 {i+1} {resname}\n")
+        f.write("#\n")
+
+        # --- Atom site loop ---
         f.write("loop_\n")
         f.write("_atom_site.group_PDB\n")
         f.write("_atom_site.id\n")
@@ -385,6 +430,7 @@ def gen_cif(
         f.write("_atom_site.label_atom_id\n")
         f.write("_atom_site.label_comp_id\n")
         f.write("_atom_site.label_asym_id\n")
+        f.write("_atom_site.label_entity_id\n")
         f.write("_atom_site.label_seq_id\n")
         f.write("_atom_site.Cartn_x\n")
         f.write("_atom_site.Cartn_y\n")
@@ -406,13 +452,15 @@ def gen_cif(
                 atom_pos = np.dot(triad, atom["pos"]) + pos
                 element = _element_from_atom_name(atom["name"])
                 f.write(
-                    f"ATOM {atomID} {element} {atom['name']} {residue_name} A {residueID} "
+                    f"ATOM {atomID} {element} {atom['name']} {residue_name} A 1 {residueID} "
                     f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
                 )
 
         # STRAND B
+        seq_residueID = 0
         for i in range(numbp - 1, -1, -1):
             residueID += 1
+            seq_residueID += 1
             basetype = sequence[i]
             triad = triads[i]
             pos = positions[i]
@@ -423,7 +471,7 @@ def gen_cif(
                 atom_pos = np.dot(triad, atom["pos"]) + pos
                 element = _element_from_atom_name(atom["name"])
                 f.write(
-                    f"ATOM {atomID} {element} {atom['name']} {residue_name} B {residueID} "
+                    f"ATOM {atomID} {element} {atom['name']} {residue_name} B 2 {seq_residueID} "
                     f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
                 )
 
