@@ -328,7 +328,6 @@ def state2pdb(
 ###########################################################################################################################
 ###########################################################################################################################
 ###########################################################################################################################
-
 import re
 
 def _element_from_atom_name(atom_name: str) -> str:
@@ -379,6 +378,9 @@ def gen_cif(
     resnames_A = [bpdicts[sequence[i]]["resA"]["resname"] for i in range(numbp)]
     resnames_B = [bpdicts[sequence[i]]["resB"]["resname"] for i in range(numbp - 1, -1, -1)]
 
+    complement = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
+    seq_B_oneletter = ''.join(complement.get(b, 'N') for b in reversed(sequence))
+
     with open(outfn, "w") as f:
 
         # --- Entity definitions ---
@@ -397,10 +399,7 @@ def gen_cif(
         f.write("_entity_poly.type\n")
         f.write("_entity_poly.pdbx_seq_one_letter_code\n")
         f.write(f"1 polydeoxyribonucleotide {''.join(sequence)}\n")
-        # Strand B is reverse complement, written 3'->5'
-        complement = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
-        seq_B = ''.join(complement.get(b, 'N') for b in reversed(sequence))
-        f.write(f"2 polydeoxyribonucleotide {seq_B}\n")
+        f.write(f"2 polydeoxyribonucleotide {seq_B_oneletter}\n")
         f.write("#\n")
 
         # --- Chain to entity mapping ---
@@ -411,7 +410,7 @@ def gen_cif(
         f.write("B 2\n")
         f.write("#\n")
 
-        # --- Sequence residues for strand A ---
+        # --- Sequence residues ---
         f.write("loop_\n")
         f.write("_entity_poly_seq.entity_id\n")
         f.write("_entity_poly_seq.num\n")
@@ -432,16 +431,17 @@ def gen_cif(
         f.write("_atom_site.label_asym_id\n")
         f.write("_atom_site.label_entity_id\n")
         f.write("_atom_site.label_seq_id\n")
+        f.write("_atom_site.auth_seq_id\n")      # <-- added
+        f.write("_atom_site.auth_asym_id\n")     # <-- added
         f.write("_atom_site.Cartn_x\n")
         f.write("_atom_site.Cartn_y\n")
         f.write("_atom_site.Cartn_z\n")
 
         atomID = 0
-        residueID = 0
 
         # STRAND A
         for i in range(numbp):
-            residueID += 1
+            seq_id = i + 1
             basetype = sequence[i]
             triad = triads[i]
             pos = positions[i]
@@ -452,18 +452,17 @@ def gen_cif(
                 atom_pos = np.dot(triad, atom["pos"]) + pos
                 element = _element_from_atom_name(atom["name"])
                 f.write(
-                    f"ATOM {atomID} {element} {atom['name']} {residue_name} A 1 {residueID} "
+                    f"ATOM {atomID} {element} {atom['name']} {residue_name} "
+                    f"A 1 {seq_id} {seq_id} A "
                     f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
                 )
 
         # STRAND B
-        seq_residueID = 0
-        for i in range(numbp - 1, -1, -1):
-            residueID += 1
-            seq_residueID += 1
-            basetype = sequence[i]
-            triad = triads[i]
-            pos = positions[i]
+        for i, bp_i in enumerate(range(numbp - 1, -1, -1)):
+            seq_id = i + 1
+            basetype = sequence[bp_i]
+            triad = triads[bp_i]
+            pos = positions[bp_i]
             residue = bpdicts[basetype]["resB"]
             residue_name = residue["resname"]
             for atom in residue["atoms"]:
@@ -471,11 +470,13 @@ def gen_cif(
                 atom_pos = np.dot(triad, atom["pos"]) + pos
                 element = _element_from_atom_name(atom["name"])
                 f.write(
-                    f"ATOM {atomID} {element} {atom['name']} {residue_name} B 2 {seq_residueID} "
+                    f"ATOM {atomID} {element} {atom['name']} {residue_name} "
+                    f"B 2 {seq_id} {seq_id} B "
                     f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
                 )
 
         f.write("#\n")
+
 
 ###########################################################################################################################
 ###########################################################################################################################
