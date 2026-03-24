@@ -329,6 +329,14 @@ def state2pdb(
 ###########################################################################################################################
 ###########################################################################################################################
 
+import re
+
+def _element_from_atom_name(atom_name: str) -> str:
+    """Extract element symbol from PDB atom name (e.g. "C3'" -> "C", "H2'" -> "H", "OP1" -> "O")"""
+    m = re.match(r"[0-9]*([A-Za-z]+)", atom_name.strip())
+    return m.group(1)[0].upper() if m else "X"
+
+
 def gen_cif(
     outfn: str,
     positions: np.ndarray,
@@ -373,6 +381,7 @@ def gen_cif(
         f.write("loop_\n")
         f.write("_atom_site.group_PDB\n")
         f.write("_atom_site.id\n")
+        f.write("_atom_site.type_symbol\n")
         f.write("_atom_site.label_atom_id\n")
         f.write("_atom_site.label_comp_id\n")
         f.write("_atom_site.label_asym_id\n")
@@ -395,8 +404,9 @@ def gen_cif(
             for atom in residue["atoms"]:
                 atomID += 1
                 atom_pos = np.dot(triad, atom["pos"]) + pos
+                element = _element_from_atom_name(atom["name"])
                 f.write(
-                    f"ATOM {atomID} {atom['name']} {residue_name} A {residueID} "
+                    f"ATOM {atomID} {element} {atom['name']} {residue_name} A {residueID} "
                     f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
                 )
 
@@ -411,13 +421,13 @@ def gen_cif(
             for atom in residue["atoms"]:
                 atomID += 1
                 atom_pos = np.dot(triad, atom["pos"]) + pos
+                element = _element_from_atom_name(atom["name"])
                 f.write(
-                    f"ATOM {atomID} {atom['name']} {residue_name} B {residueID} "
+                    f"ATOM {atomID} {element} {atom['name']} {residue_name} B {residueID} "
                     f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f}\n"
                 )
 
         f.write("#\n")
-
 
 ###########################################################################################################################
 ###########################################################################################################################
