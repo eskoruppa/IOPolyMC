@@ -477,6 +477,169 @@ def gen_cif(
 
         f.write("#\n")
 
+def gen_cif_trajectory(
+    outfn: str,
+    positions: np.ndarray,
+    triads: np.ndarray,
+    bpdicts: dict[str, Any] = None,
+    sequence: str = None,
+    center: bool = True,
+    ignore_errors: bool = False,
+):
+    """
+    Writes a multi-frame DNA structure as mmCIF with pdbx_PDB_model_num.
+    
+    positions: (n_frames, n_bp, 3) in nm
+    triads:    (n_frames, n_bp, 3, 3)
+    
+    Single-frame inputs (positions.shape == (n_bp, 3)) are forwarded to gen_cif.
+    Load in ChimeraX with: open traj.cif ; coordset #1 play
+    """
+    # --- Forward single frames to the original function ---
+    if positions.ndim == 2:
+        return gen_cif(
+            outfn, positions, triads, bpdicts=bpdicts, sequence=sequence,
+            center=center, ignore_errors=ignore_errors,
+        )
+
+    if positions.ndim != 3:
+        raise ValueError(f"positions must be (n_frames, n_bp, 3) or (n_bp, 3), got shape {positions.shape}")
+    if triads.ndim != 4:
+        raise ValueError(f"triads must be (n_frames, n_bp, 3, 3) or (n_bp, 3, 3), got shape {triads.shape}")
+
+    n_frames, numbp, _ = positions.shape
+
+    if bpdicts is None:
+        bpdicts = _load_bpdicts()
+    sequence = sequence.upper()
+
+    if sequence is None:
+        sequence = _random_sequence(numbp)
+
+    # Validate discretization on first frame only (representative check)
+    disc_len = _discretization_length(positions[0])
+    if np.abs(disc_len - 0.34) / 0.34 > 0.5:
+        if not ignore_errors:
+            raise ValueError(
+                f"Discretization length needs to be close to 0.34 nm. Got {disc_len:.4f} nm."
+            )
+
+    # Center each frame independently around its own centroid
+    positions = positions.copy().astype(float)
+    if center:
+        positions -= positions.mean(axis=1, keepdims=True)
+
+    positions_ang = positions * 10.0  # nm -> Angstrom
+
+    # Precompute residue names (same for all frames)
+    resnames_A = [bpdicts[sequence[i]]["resA"]["resname"] for i in range(numbp)]
+    resnames_B = [bpdicts[sequence[i]]["resB"]["resname"] for i in range(numbp - 1, -1, -1)]
+
+    complement = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
+    seq_B_oneletter = ''.join(complement.get(b, 'N') for b in reversed(sequence))
+
+    with open(outfn, "w") as f:
+
+        # --- Header: written once, shared across all models ---
+        f.write("data_DNA\n#\n")
+
+        f.write("loop_\n")
+        f.write("_entity.id\n")
+        f.write("_entity.type\n")
+        f.write("_entity.pdbx_description\n")
+        f.write("1 polymer 'DNA strand A'\n")
+        f.write("2 polymer 'DNA strand B'\n")
+        f.write("#\n")
+
+        f.write("loop_\n")
+        f.write("_entity_poly.entity_id\n")
+        f.write("_entity_poly.type\n")
+        f.write("_entity_poly.pdbx_seq_one_letter_code\n")
+        f.write(f"1 polydeoxyribonucleotide {''.join(sequence)}\n")
+        f.write(f"2 polydeoxyribonucleotide {seq_B_oneletter}\n")
+        f.write("#\n")
+
+        f.write("loop_\n")
+        f.write("_struct_asym.id\n")
+        f.write("_struct_asym.entity_id\n")
+        f.write("A 1\n")
+        f.write("B 2\n")
+        f.write("#\n")
+
+        f.write("loop_\n")
+        f.write("_entity_poly_seq.entity_id\n")
+        f.write("_entity_poly_seq.num\n")
+        f.write("_entity_poly_seq.mon_id\n")
+        for i, resname in enumerate(resnames_A):
+            f.write(f"1 {i+1} {resname}\n")
+        for i, resname in enumerate(resnames_B):
+            f.write(f"2 {i+1} {resname}\n")
+        f.write("#\n")
+
+        # --- Atom site loop: all frames, distinguished by pdbx_PDB_model_num ---
+        f.write("loop_\n")
+        f.write("_atom_site.group_PDB\n")
+        f.write("_atom_site.id\n")
+        f.write("_atom_site.type_symbol\n")
+        f.write("_atom_site.label_atom_id\n")
+        f.write("_atom_site.label_comp_id\n")
+        f.write("_atom_site.label_asym_id\n")
+        f.write("_atom_site.label_entity_id\n")
+        f.write("_atom_site.label_seq_id\n")
+        f.write("_atom_site.auth_seq_id\n")
+        f.write("_atom_site.auth_asym_id\n")
+        f.write("_atom_site.Cartn_x\n")
+        f.write("_atom_site.Cartn_y\n")
+        f.write("_atom_site.Cartn_z\n")
+        f.write("_atom_site.pdbx_PDB_model_num\n")  # ← frame index
+
+        atomID = 0
+
+        for frame_idx in range(n_frames):
+            model_num = frame_idx + 1
+            pos_frame = positions_ang[frame_idx]     # (n_bp, 3)
+            tri_frame = triads[frame_idx]            # (n_bp, 3, 3)
+
+            # Strand A
+            for i in range(numbp):
+                seq_id = i + 1
+                basetype = sequence[i]
+                triad = tri_frame[i]
+                pos = pos_frame[i]
+                residue = bpdicts[basetype]["resA"]
+                residue_name = residue["resname"]
+                for atom in residue["atoms"]:
+                    atomID += 1
+                    atom_pos = np.dot(triad, atom["pos"]) + pos
+                    element = _element_from_atom_name(atom["name"])
+                    f.write(
+                        f"ATOM {atomID} {element} {atom['name']} {residue_name} "
+                        f"A 1 {seq_id} {seq_id} A "
+                        f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f} "
+                        f"{model_num}\n"
+                    )
+
+            # Strand B
+            for i, bp_i in enumerate(range(numbp - 1, -1, -1)):
+                seq_id = i + 1
+                basetype = sequence[bp_i]
+                triad = tri_frame[bp_i]
+                pos = pos_frame[bp_i]
+                residue = bpdicts[basetype]["resB"]
+                residue_name = residue["resname"]
+                for atom in residue["atoms"]:
+                    atomID += 1
+                    atom_pos = np.dot(triad, atom["pos"]) + pos
+                    element = _element_from_atom_name(atom["name"])
+                    f.write(
+                        f"ATOM {atomID} {element} {atom['name']} {residue_name} "
+                        f"B 2 {seq_id} {seq_id} B "
+                        f"{atom_pos[0]:.3f} {atom_pos[1]:.3f} {atom_pos[2]:.3f} "
+                        f"{model_num}\n"
+                    )
+
+        f.write("#\n")
+
 
 ###########################################################################################################################
 ###########################################################################################################################
