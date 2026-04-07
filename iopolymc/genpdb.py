@@ -596,6 +596,10 @@ def gen_cif_trajectory(
         atomID = 0
 
         for frame_idx in range(n_frames):
+            
+            if frame_idx % 50 == 0:
+                print(f"Writing frame {frame_idx+1}/{n_frames} to CIF...")
+
             model_num = frame_idx + 1
             pos_frame = positions_ang[frame_idx]     # (n_bp, 3)
             tri_frame = triads[frame_idx]            # (n_bp, 3, 3)
